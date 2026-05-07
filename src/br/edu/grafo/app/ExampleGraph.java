@@ -41,7 +41,7 @@ import br.edu.grafo.algorithm.*;
  *
  * <h2>Como Executar</h2>
  * <pre>{@code
- * java -cp output br.edu.grafo.app.ExemploGrafo
+ * java -cp output br.edu.grafo.app.ExampleGraph
  * }</pre>
  *
  * <h2>Resultado do Warshall</h2>

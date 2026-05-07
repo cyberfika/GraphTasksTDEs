@@ -13,25 +13,19 @@ node "Java Runtime Environment" as JRE {
     artifact "JVM" as JVM
 }
 
-node "File System" as FileSystem {
-    folder "Binary Data" as DataDir {
-        file "*.bin files" as BinFiles
-    }
-    folder "Project Root" as ProjRoot {
-        file ".gitignore" as GitIgnore
-        file "START_HERE.md" as StartHere
-        file "README.md" as Readme
-    }
+folder "Project Root" as ProjRoot {
+    file ".gitignore" as GitIgnore
+    file "START_HERE.md" as StartHere
+    file "README.md" as Readme
 }
 
-database "Graph Data Storage" as Storage {
-    table "Saved Graphs" as SavedGraphs
+folder "Binary Data (/data)" as DataDir {
+    file "*.bin files" as BinFiles
 }
 
 SourceCode -.-> CompiledClasses: javac compile
 CompiledClasses -.-> JVM: java execute
 JVM -.-> DataDir: read/write .bin
-DataDir -.-> Storage: persist
 
 SourceCode --> Docs: documents
 BuildScripts -.-> CompiledClasses: automate compilation
@@ -47,13 +41,9 @@ end note
 
 note right of DataDir
   Location: /data
-  Files saved by GrafoStorage
+  Files saved by GraphStorage
   Format: Java Serialized Objects
 end note
 
-note right of Storage
-  In-memory + persistent
-  Loaded via ObjectInputStream
-end note
 
 @enduml

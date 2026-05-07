@@ -3,96 +3,73 @@
 > Status: Active
 > Authority: Tier 2 - Core Knowledge
 > Last Updated: 2026-05-07
+> Owner: Jafte Carneiro Fagundes da Silva
 
-## Project Summary
+## Resumo
 
-**GraphTasksTDEs** (Trabalho Discente Efetivo) is a Java educational project implementing graph algorithms as part of a computer science curriculum.
+**GraphTasksTDEs** e um projeto educacional em Java para implementar e demonstrar grafos direcionados, ponderados e rotulados.
 
-**Vision**: Implement a complete, well-engineered directed graph library with classic algorithms (BFS, DFS, Dijkstra, Warshall).
+## Objetivos
 
-## Goals
+1. Representar grafos direcionados com lista de adjacencia.
+2. Demonstrar manipulacao de arestas e vertices.
+3. Executar BFS, DFS, Dijkstra e Warshall.
+4. Salvar e carregar grafos locais em `.bin`.
+5. Manter documentacao navegavel para humanos e agentes.
 
-1. **Educational**: Learn graph data structures and algorithms through implementation
-2. **Quality**: Apply modern Java practices (OOP, SOLID, clean code)
-3. **Completeness**: Implement comprehensive graph functionality
-4. **Correctness**: Ensure algorithms produce correct results
+## Escopo Atual
 
-## Scope
+Incluido:
 
-### In Scope
+- `Edge`
+- `DirectedGraph`
+- `GraphAlgorithms`
+- `GraphApplicationService`
+- `GraphConsoleUI`
+- `GraphStorage`
+- `Main`
+- `ExampleGraph`
 
-- Directed graph representation
-- Weighted edges
-- Edge labels
-- Four key algorithms: BFS, DFS, Dijkstra, Warshall
-- Test/example program demonstrating all functionality
-- Complete documentation
+Fora do escopo atual:
 
-### Out of Scope
+- GUI.
+- Banco de dados.
+- API web.
+- Testes automatizados.
+- Build tool como Maven ou Gradle.
 
-- Undirected graphs
-- Multigraphs (multiple edges between same vertices)
-- GUI or visualization
-- Performance optimization beyond algorithm choice
-- Distributed or parallel algorithms
-- Graph serialization/persistence
+## Fase Atual
 
-## Current Phase
+- **TDE 1**: completo.
+- **TDE 2**: completo.
+- **Normalizacao documental**: concluida em 2026-05-07 para alinhar docs aos nomes reais do codigo.
 
-**TDE 1** (Complete ✓):
-- Graph data structure implementation
-- BFS and DFS algorithms
-- Dijkstra's shortest path algorithm
-- Code quality improvements (no raw types, proper naming)
-- Example program
+## Restricoes
 
-**TDE 2** (In Planning):
-- Warshall algorithm for transitive closure
-- Reachability matrix computation
-- Additional test cases and examples
+- Java 8+.
+- Sem dependencias externas.
+- Documentacao pode ficar em portugues.
+- Identificadores de codigo devem permanecer em ingles.
+- Nao alterar comportamento sem pedido explicito.
 
-## Constraints
+## Validacao
 
-### Technical Constraints
+Validacao manual atual:
 
-- Java 8 or higher
-- No external dependencies (except Java standard library)
-- Single-file compilation
-- Must compile without warnings
+```bash
+java -cp output br.edu.grafo.app.ExampleGraph
+```
 
-### Educational Constraints
+Gap:
 
-- Learning emphasis over performance
-- Code clarity and maintainability valued
-- Proper documentation required
-- Following Java standards and conventions
-
-## Key Dates
-
-- **Project Start**: 2026-05-07
-- **TDE 1 Completion**: 2026-05-07
-- **TDE 2 Target**: To be scheduled
-- **Final Deadline**: To be determined by instructor
-
-## Team and Ownership
-
-- **Student**: jafte
-- **Type**: Individual assignment
-- **Contact**: [Via GitHub issues and commits]
-
-## Success Criteria
-
-1. ✓ Graph implementation compiles without errors or warnings
-2. ✓ BFS and DFS correctly traverse graphs
-3. ✓ Dijkstra correctly computes shortest paths
-4. ⏳ Warshall correctly computes reachability matrix
-5. ✓ Code follows Java standards and OOP principles
-6. ✓ Complete documentation with architecture and design decisions
-7. ⏳ All algorithms tested and verified against expected results
+- Nao ha testes automatizados.
+- A compilacao do zero depende de `javac` disponivel no PATH.
 
 ## Related Documents
 
-- `/docs/plan.md` — Current implementation plan
-- `/docs/design.md` — Architecture and design details
-- `/docs/tasks.md` — Task breakdown
-- `/docs/knowledge/KNOWLEDGE_BASE.md` — Document map
+- `START_HERE.md`
+- `README.md`
+- `docs/design.md`
+- `docs/tasks.md`
+- `docs/memory.md`
+- `docs/knowledge/KNOWLEDGE_BASE.md`

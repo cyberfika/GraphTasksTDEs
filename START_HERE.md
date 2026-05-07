@@ -1,119 +1,104 @@
 # START HERE
 
-## Project Summary
+> Status: Active
+> Authority: Tier 3 - Guia de entrada
+> Last Updated: 2026-05-07
+> Owner: Jafte Carneiro Fagundes da Silva
 
-**GraphTasksTDEs** is a Java educational project implementing directed, weighted, and labeled graph representations with classic graph algorithms (BFS, DFS, Dijkstra, Warshall).
+## Resumo Do Projeto
 
-Package structure:
-- `br.edu.grafo.model` — Graph and Edge classes
-- `br.edu.grafo.algorithm` — Algorithms (Warshall, etc.)
-- `br.edu.grafo.util` — Storage/serialization utilities
-- `br.edu.grafo.app` — Interactive menu and examples
+**GraphTasksTDEs** e um projeto educacional em Java 8+ para representar grafos direcionados, ponderados e rotulados. O projeto inclui interface de console, persistencia em `.bin` e algoritmos classicos de grafos.
 
-**Current Focus**: Complete and stable - ready for use.
+## Estado Atual
 
-## Current Status
+- **TDE 1**: representacao de grafo, BFS, DFS e Dijkstra completos.
+- **TDE 2**: Warshall, matriz de alcancabilidade, menu e save/load completos.
+- **Validacao atual**: execucao manual de `ExampleGraph`.
+- **Testes automatizados**: ainda nao existem.
 
-- **TDE 1**: Graph representation with basic algorithms — ✓ Complete
-- **TDE 2**: Warshall algorithm and save/load functionality — ✓ Complete
-- **Documentation**: Complete with package structure
-- **Menu System**: Interactive CLI with save/load — ✓ Complete
+## Estrutura Principal
 
-## Team and Ownership
-
-- Student: jafte
-- Project Type: Educational (Trabalho Discente Efetivo)
-
-## How to Run Locally
-
-### Directory Structure
-```
+```text
 GraphTasksTDEs/
-├── src/                    # Source code
-│   └── br/edu/grafo/
-│       ├── model/         # Aresta, GrafoDirecionado
-│       ├── algorithm/     # AlgoritmosGrafo
-│       ├── util/          # GrafoStorage
-│       └── app/           # Main, ExemploGrafo
-├── output/                # Compiled .class files
-├── data/                  # Saved .bin files
-└── docs/                  # Documentation
+├── AGENTS.md
+├── agents/agents.md
+├── src/br/edu/grafo/
+│   ├── model/          # Edge, DirectedGraph
+│   ├── algorithm/      # GraphAlgorithms
+│   ├── util/           # GraphStorage
+│   ├── application/    # GraphApplicationService
+│   ├── interfaces/     # GraphConsoleUI
+│   └── app/            # Main, ExampleGraph
+├── data/               # Grafos salvos em .bin
+├── output/             # Classes compiladas e artefatos gerados
+└── docs/               # Documentacao do projeto
 ```
 
-### Compile
+## Como Compilar
 
-**Using the compile script:**
+O projeto nao usa Maven ou Gradle. E necessario ter `javac` no PATH.
+
 ```bash
 ./compile.sh
 ```
 
-**Or manually:**
+Ou manualmente:
+
 ```bash
 javac -d output -sourcepath src \
-    src/br/edu/grafo/model/*.java \
-    src/br/edu/grafo/algorithm/*.java \
-    src/br/edu/grafo/util/*.java \
-    src/br/edu/grafo/app/*.java
+  src/br/edu/grafo/model/*.java \
+  src/br/edu/grafo/algorithm/*.java \
+  src/br/edu/grafo/util/*.java \
+  src/br/edu/grafo/application/*.java \
+  src/br/edu/grafo/interfaces/*.java \
+  src/br/edu/grafo/app/*.java
 ```
 
-### Run Interactive Menu
+## Como Executar
 
-**From project root (recommended):**
+Menu interativo:
+
 ```bash
 java -cp output br.edu.grafo.app.Main
 ```
 
-This ensures that saved .bin files go to `/data` directory.
+Programa de exemplo:
 
-### Run Example Program
-
-**From project root:**
 ```bash
-java -cp output br.edu.grafo.app.ExemploGrafo
+java -cp output br.edu.grafo.app.ExampleGraph
 ```
 
-## How to Test
+## Como Validar
 
-Run the example program which includes:
-- Graph creation with weighted edges
-- BFS and DFS traversals
-- Dijkstra's shortest path algorithm
-- Input validation
+Execute:
 
-## Current Sprint or Current Focus
+```bash
+java -cp output br.edu.grafo.app.ExampleGraph
+```
 
-**TDE 2 - Reachability Matrix and Warshall Algorithm**
-- Implement Warshall's algorithm for transitive closure
-- Test reachability matrix computation
-- Dijkstra algorithm (already implemented in TDE 1)
+O exemplo demonstra criacao de grafo, manipulacao de arestas e Warshall. BFS, DFS e Dijkstra sao executados pelo menu via `GraphApplicationService`, mas ainda nao ha testes automatizados com JUnit.
 
-## Key Architecture Decisions
+## Decisoes De Arquitetura
 
-1. **Graph Representation**: Adjacency list using `List<List<Aresta>>`
-2. **Edge Model**: Weighted, directed edges with optional labels
-3. **Algorithms**: Static utility methods in `AlgoritmosGrafo` class
-4. **Error Handling**: `IllegalArgumentException` for invalid vertices
-5. **No Raw Types**: Generic `List<Aresta>` instead of raw arrays
+- `DirectedGraph` representa o grafo com lista de adjacencia baseada em `List<Edge>[]`.
+- `Edge` representa uma aresta direcionada com destino, peso e rotulo opcional.
+- `GraphAlgorithms` contem Warshall e helpers de impressao de matriz.
+- `GraphApplicationService` orquestra casos de uso e implementa BFS, DFS e Dijkstra.
+- `GraphConsoleUI` concentra entrada e saida do console.
+- `GraphStorage` usa serializacao Java para salvar e carregar grafos `.bin`.
 
-See `/docs/knowledge/KNOWLEDGE_BASE.md` for detailed architecture.
+## Politica De Idioma
 
-## Credentials and Access Policy
+- Documentacao pode ficar em portugues.
+- Comentarios e JavaDoc podem ficar em portugues.
+- Codigo, nomes de arquivos, classes, metodos, pacotes e identificadores tecnicos devem permanecer em ingles.
 
-No credentials required for local development.
+## Primeiros Arquivos Para Ler
 
-## First Files to Read
-
-1. `START_HERE.md` (this file)
-2. `/docs/plan.md` — Current implementation plan
-3. `/docs/design.md` — Architecture and UML diagrams
-4. `/docs/knowledge/KNOWLEDGE_BASE.md` — Document map and authority hierarchy
-5. Source code: `Aresta.java`, `GrafoDirecionado.java`, `AlgoritmosGrafo.java`
-
-## Documentation Map
-
-- `/docs/plan.md` — Implementation plan and acceptance criteria
-- `/docs/tasks.md` — Task breakdown and progress
-- `/docs/design.md` — Architecture, domain model, UML
-- `/docs/memory.md` — Decisions, preferences, and session context
-- `/docs/knowledge/` — Knowledge base with authority hierarchy
-- `AGENTS.md` — Rules for AI agent assistance
+1. `AGENTS.md`
+2. `agents/agents.md`
+3. `docs/knowledge/KNOWLEDGE_BASE.md`
+4. `docs/design.md`
+5. `src/br/edu/grafo/model/DirectedGraph.java`
+6. `src/br/edu/grafo/application/GraphApplicationService.java`
+7. `src/br/edu/grafo/algorithm/GraphAlgorithms.java`

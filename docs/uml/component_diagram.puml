@@ -20,7 +20,7 @@ package "Persistence Layer" {
     component [Storage Manager] as Storage
 }
 
-database [File System] {
+database "File System" {
     folder "Binary Files (.bin)" as DataFolder
 }
 

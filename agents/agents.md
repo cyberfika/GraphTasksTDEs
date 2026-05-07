@@ -75,6 +75,12 @@ Exception:
 - Java comments and JavaDoc may be written in Portuguese when useful for the project team.
 - If the user explicitly requests another language for explanation outside generated repository files, you may use that language in the chat, but repository documentation must remain in English unless explicitly instructed otherwise.
 
+Project-specific exception for GraphTasksTDEs:
+
+- The user explicitly approved Portuguese documentation for this repository on 2026-05-07.
+- Java comments and JavaDoc may remain in Portuguese.
+- Code, file names, class names, method names, packages, and technical identifiers must remain in English.
+
 ---
 
 ## 4. Mandatory Documentation System

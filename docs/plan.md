@@ -1,116 +1,82 @@
 # Plan
 
-> Status: Completed ✓
+> Status: Completed
 > Authority: Tier 3 - Working Document
 > Last Updated: 2026-05-07
->
-> **Aluno**: Jafte Carneiro Fagundes da Silva
-> **Curso**: Ciência da Computação
-> **Disciplina**: Resolução de Problemas com Grafos
+> Owner: Jafte Carneiro Fagundes da Silva
 
-## Objective
+## Objetivo
 
-✓ **COMPLETE**: Implement Warshall's algorithm for computing the transitive closure (reachability matrix) of a directed graph.
+Registrar o plano concluido do TDE 2: Warshall, matriz de alcancabilidade e persistencia de grafos em `.bin`.
 
-## Scope
+## Escopo
 
-- **In Scope**:
-  - Warshall algorithm implementation in `AlgoritmosGrafo`
-  - Reachability matrix computation
-  - Test cases demonstrating reachability between all vertex pairs
-  - Documentation of algorithm and results
+Incluido:
 
-- **Out of Scope**:
-  - Modifications to graph representation (use existing `GrafoDirecionado`)
-  - GUI or visualization
-  - Performance optimization beyond algorithm correctness
+- Implementacao de Warshall em `GraphAlgorithms`.
+- Exibicao de matriz booleana e estatisticas de alcancabilidade.
+- Integracao com menu via `GraphApplicationService`.
+- Exemplo manual em `ExampleGraph`.
+- Persistencia local via `GraphStorage`.
+
+Fora do escopo:
+
+- Testes automatizados.
+- Maven, Gradle ou JUnit.
+- Refatoracao de comportamento de validacao.
+- Limpeza de `output/`.
 
 ## Assumptions
 
-1. Graph representation (`GrafoDirecionado`) is stable and complete
-2. Vertices are indexed from 0 to numVertices-1
-3. Reachability is determined by path existence (any cost)
-4. Self-loops and cycles are allowed
-5. Graph may be disconnected
+1. O projeto deve permanecer compativel com Java 8+.
+2. Vertices sao indexados de `0` a `numVertices - 1`.
+3. Alcancabilidade considera existencia de caminho, independentemente de peso.
+4. Autoalcancabilidade e considerada verdadeira em Warshall.
+5. Documentacao pode ficar em portugues; identificadores de codigo permanecem em ingles.
 
-## Questions for the User
+## Arquitetura Impactada
 
-1. ✓ **Self-reachability**: YES — Vertex can reach itself (included in matrix)
-2. ✓ **Output format**: `boolean[][]` — True/false for reachability
-3. ✓ **Display both matrices**: YES — Show initial adjacency and final reachability
+- `GraphAlgorithms`: Warshall e helpers de impressao.
+- `GraphApplicationService`: orquestracao dos algoritmos e operacoes do grafo.
+- `GraphStorage`: persistencia por serializacao Java.
+- `ExampleGraph`: exemplo manual de validacao.
 
-## Constraints
+## Estrategia De Implementacao
 
-- Java 8+ compatible
-- Must compile without warnings
-- No external dependencies beyond Java standard library
-- Must follow OOP and SOLID principles
+Implementacao atual:
 
-## Architecture Impact
+1. `GraphAlgorithms.warshall(DirectedGraph graph)` cria uma matriz `boolean[][]`.
+2. A matriz inicial recebe as arestas diretas existentes.
+3. A diagonal e marcada como `true`.
+4. Os tres loops de Warshall calculam o fechamento transitivo.
+5. `ExampleGraph` exibe matriz inicial, matriz final e verificacoes especificas.
 
-- Minimal: Add static method `warshall()` to `AlgoritmosGrafo`
-- No changes to core graph classes needed
-- No changes to data structures
+## Estrategia De Teste
 
-## Implementation Strategy
+Validacao atual:
 
-1. **Algorithm Implementation**
-   - Create `warshall(GrafoDirecionado g): boolean[][]` method
-   - Initialize reachability matrix from adjacency matrix
-   - Apply Warshall's algorithm (Floyd-Warshall variant for reachability)
-   - Return final reachability matrix
+- Execucao manual de `java -cp output br.edu.grafo.app.ExampleGraph`.
+- Compilacao direta com o `javac.exe` configurado no projeto usando `--release 8`.
 
-2. **Test Cases**
-   - Test with simple connected graph
-   - Test with disconnected graph
-   - Test with cycles
-   - Test with single vertex
-   - Verify known reachability patterns
+Gap conhecido:
 
-3. **Documentation**
-   - Update `ExemploGrafo` to demonstrate Warshall
-   - Document expected output for test graph
-   - Add comments explaining algorithm
+- Nao ha testes automatizados.
+- Nao foi introduzido JUnit nesta tarefa para evitar mudanca de estrutura e dependencia.
+- A compilacao com JDK moderno em modo `--release 8` emite warnings de opcao obsoleta, mas gera bytecode executavel no Java 8.
 
-## Testing Strategy
+## Riscos
 
-- Unit-like tests via example program (`ExemploGrafo`)
-- Manual verification of output against expected reachability
-- Edge cases: single vertex, no edges, fully connected, disconnected components
-
-## Risks
-
-- Algorithm correctness validation (manual verification required)
-- Large graphs may need memory optimization (not critical for educational use)
-- Confusion between reachability (boolean) and shortest distance (Dijkstra)
+- `GraphStorage` usa `ObjectInputStream`; arquivos `.bin` devem ser locais e confiaveis.
+- `output/` pode conter classes antigas; limpar esse diretorio exige confirmacao separada.
+- A politica de erro e mista entre `DirectedGraph`, `GraphApplicationService` e `GraphStorage`.
 
 ## Acceptance Criteria
 
-- [x] `warshall()` method implemented and compiles ✓
-- [x] Test graph produces correct reachability matrix ✓
-- [x] All vertices' reachability determined correctly ✓
-- [x] Example program demonstrates Warshall output ✓
-- [x] Code follows Java standards and OOP principles ✓
-- [x] No compilation warnings ✓
-
-## Implementation Summary
-
-**Files Modified/Created**:
-- Created `AlgoritmosGrafo.java` with:
-  - `warshall(GrafoDirecionado): boolean[][]` — Main algorithm
-  - `imprimeMatrizBooleana()` — Utility for pretty-printing
-  - `imprimeEstatisticasAlcancabilidade()` — Utility for statistics
-
-- Modified `GrafoDirecionado.java`:
-  - Added `existeAresta(int, int): boolean` method
-
-- Modified `ExemploGrafo.java`:
-  - Added section 10 demonstrating Warshall
-  - Shows both adjacency and reachability matrices
-  - Includes verification checks
-
-**Algorithm Details**:
-- Time Complexity: O(V³)
-- Space Complexity: O(V²)
-- Handles cycles and self-reachability correctly
-- Test result: All vertices reach all others (expected with cycle)
+- [x] Warshall implementado em `GraphAlgorithms`.
+- [x] Menu integrado via `GraphApplicationService`.
+- [x] Exemplo manual em `ExampleGraph`.
+- [x] Save/load local via `GraphStorage`.
+- [x] Documentacao alinhada aos nomes reais do codigo.
+- [ ] Testes automatizados adicionados.
+- [x] Compilacao verificada no ambiente atual com `javac.exe --release 8`.
+- [x] Execucao manual verificada com Java 8.

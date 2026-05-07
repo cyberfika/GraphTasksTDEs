@@ -1,300 +1,129 @@
-# GraphTasksTDEs - Sistema de Grafos Direcionados
+# GraphTasksTDEs - Sistema De Grafos Direcionados
 
-![Java](https://img.shields.io/badge/Java-8%2B-orange?logo=java)
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-blue)
-![Version](https://img.shields.io/badge/Version-2.0-blue)
+> Status: Active
+> Authority: Tier 3 - Guia do projeto
+> Last Updated: 2026-05-07
+> Owner: Jafte Carneiro Fagundes da Silva
 
-## 👨‍🎓 Informações do Aluno
+## Informacoes Do Aluno
 
 - **Nome**: Jafte Carneiro Fagundes da Silva
-- **Curso**: Ciência da Computação
-- **Disciplina**: Resolução de Problemas com Grafos
+- **Curso**: Ciencia da Computacao
+- **Disciplina**: Resolucao de Problemas com Grafos
 - **Tipo**: Trabalho Discente Efetivo (TDE)
 
----
+## Descricao
 
-## 📋 Descrição do Projeto
+**GraphTasksTDEs** e um sistema educacional em Java para representar e manipular grafos direcionados, ponderados e rotulados.
 
-**GraphTasksTDEs** é um sistema educacional implementado em Java para representar e manipular grafos direcionados, ponderados e rotulados, com suporte a algoritmos clássicos de grafos.
+Funcionalidades principais:
 
-### Objetivos
-- ✅ Implementar representação eficiente de grafos (lista de adjacência)
-- ✅ Desenvolver algoritmos de traversal (BFS, DFS)
-- ✅ Implementar algoritmo de caminho mínimo (Dijkstra)
-- ✅ Implementar algoritmo de alcançabilidade (Warshall)
-- ✅ Criar interface interativa para manipulação
-- ✅ Adicionar persistência (serialização em .bin)
+- Criacao de grafos com vertices indexados.
+- Adicao e remocao de arestas direcionadas com peso e rotulo.
+- Visualizacao por matriz e lista de adjacencia.
+- BFS, DFS e Dijkstra no servico de aplicacao.
+- Warshall em `GraphAlgorithms`.
+- Persistencia de grafos em arquivos `.bin` via `GraphStorage`.
 
----
+## Estrutura
 
-## 🏗️ Estrutura do Projeto
-
-```
+```text
 GraphTasksTDEs/
+├── AGENTS.md
+├── agents/agents.md
 ├── src/br/edu/grafo/
-│   ├── model/           # Modelos de dados (Aresta, GrafoDirecionado)
-│   ├── algorithm/       # Algoritmos de grafos
-│   ├── util/            # Utilitários (persistência)
-│   └── app/             # Aplicação (Menu interativo, Exemplos)
-├── output/              # Arquivos compilados (.class)
-├── data/                # Grafos salvos (.bin)
-├── docs/                # Documentação
-│   ├── design.md        # Arquitetura e design
-│   ├── plan.md          # Plano de implementação
-│   ├── tasks.md         # Tarefas completadas
-│   ├── memory.md        # Contexto de sessão
-│   ├── uml/             # Diagramas PlantUML
-│   └── knowledge/       # Base de conhecimento
-├── compile.sh           # Script de compilação
-├── START_HERE.md        # Guia rápido
-└── README.md            # Este arquivo
+│   ├── model/          # Edge, DirectedGraph
+│   ├── algorithm/      # GraphAlgorithms
+│   ├── util/           # GraphStorage
+│   ├── application/    # GraphApplicationService
+│   ├── interfaces/     # GraphConsoleUI
+│   └── app/            # Main, ExampleGraph
+├── data/               # Grafos salvos
+├── output/             # Classes compiladas
+└── docs/               # Documentacao
 ```
 
----
+## Requisitos
 
-## 🚀 Como Usar
+- Java 8 ou superior.
+- `javac` no PATH para compilar do zero.
+- Bash ou terminal compativel para usar `compile.sh`.
 
-### Pré-requisitos
-- Java 8 ou superior instalado
-- Bash ou terminal compatível (para compile.sh)
+## Compilacao
 
-### Compilação
-
-**Opção 1 - Script automático:**
 ```bash
 ./compile.sh
 ```
 
-**Opção 2 - Comando manual:**
+Ou:
+
 ```bash
 javac -d output -sourcepath src \
-    src/br/edu/grafo/model/*.java \
-    src/br/edu/grafo/algorithm/*.java \
-    src/br/edu/grafo/util/*.java \
-    src/br/edu/grafo/app/*.java
+  src/br/edu/grafo/model/*.java \
+  src/br/edu/grafo/algorithm/*.java \
+  src/br/edu/grafo/util/*.java \
+  src/br/edu/grafo/application/*.java \
+  src/br/edu/grafo/interfaces/*.java \
+  src/br/edu/grafo/app/*.java
 ```
 
-### Execução
+## Execucao
 
-**Menu Interativo:**
+Menu interativo:
+
 ```bash
 java -cp output br.edu.grafo.app.Main
 ```
 
-**Programa de Exemplo:**
+Programa de exemplo:
+
 ```bash
-java -cp output br.edu.grafo.app.ExemploGrafo
+java -cp output br.edu.grafo.app.ExampleGraph
 ```
 
----
+## Classes Principais
 
-## 📊 Funcionalidades
+| Classe | Responsabilidade |
+| --- | --- |
+| `Edge` | Representa uma aresta com destino, peso e rotulo. |
+| `DirectedGraph` | Mantem vertices, informacoes e lista de adjacencia. |
+| `GraphAlgorithms` | Implementa Warshall e helpers de impressao. |
+| `GraphApplicationService` | Orquestra casos de uso; contem BFS, DFS e Dijkstra. |
+| `GraphConsoleUI` | Centraliza entrada e saida do console. |
+| `GraphStorage` | Salva, carrega e lista grafos `.bin`. |
+| `Main` | Ponto de entrada do menu interativo. |
+| `ExampleGraph` | Exemplo manual de uso e validacao. |
 
-### 1. Gerenciamento de Grafos
-- ➕ Criar grafo com número customizável de vértices
-- ➕ Adicionar arestas direcionadas com peso e rótulo
-- ❌ Remover arestas
-- 👁️ Visualizar em formato de matriz ou lista
-- ℹ️ Obter informações do grafo (vértices, arestas, densidade, graus)
-
-### 2. Algoritmos de Traversal
-- **BFS** (Busca em Largura) - O(V+E)
-- **DFS** (Busca em Profundidade) - O(V+E)
-
-### 3. Algoritmos de Caminho
-- **Dijkstra** - Caminho mínimo desde uma origem - O((V+E) log V)
-- **Warshall** - Matriz de alcançabilidade (fechamento transitivo) - O(V³)
-
-### 4. Persistência
-- 💾 Salvar grafos em arquivos binários (.bin)
-- 📂 Carregar grafos salvos
-- 📋 Listar grafos disponíveis
-
----
-
-## 🏛️ Arquitetura
-
-### Camadas
-
-```
-┌─────────────────────────────────────────┐
-│     Application Layer (Menu, Example)    │
-├─────────────────────────────────────────┤
-│     Algorithm Layer (Warshall, etc.)    │
-├─────────────────────────────────────────┤
-│     Domain Layer (Graph, Edge)          │
-├─────────────────────────────────────────┤
-│     Persistence Layer (Storage)         │
-└─────────────────────────────────────────┘
-```
-
-### Pacotes
-
-| Pacote | Responsabilidade |
-|--------|------------------|
-| `br.edu.grafo.model` | Modelos de domínio (Aresta, GrafoDirecionado) |
-| `br.edu.grafo.algorithm` | Algoritmos de grafos (Warshall, etc.) |
-| `br.edu.grafo.util` | Utilitários (GrafoStorage para .bin) |
-| `br.edu.grafo.app` | Interface (Main com menu, ExemploGrafo) |
-
----
-
-## 📈 Algoritmos Implementados
-
-### Warshall (Fechamento Transitivo)
-```
-Entrada: Grafo direcionado G = (V, E)
-Saída: Matriz booleana reach[V][V] onde reach[i][j] = true ⟺ ∃ caminho de i para j
-
-Algoritmo:
-1. Inicializar reach[i][j] = true se aresta (i,j) existe
-2. reach[i][i] = true (self-reachability)
-3. Para cada k, i, j:
-     reach[i][j] = reach[i][j] OR (reach[i][k] AND reach[k][j])
-```
-
-**Complexidade**:
-- Tempo: O(V³)
-- Espaço: O(V²)
-
-### Dijkstra (Caminho Mínimo)
-```
-Entrada: Grafo G, vértice origem s
-Saída: Array dist[] com distâncias mínimas de s
-
-Algoritmo: Greedy com PriorityQueue
-- Inicializar dist[s] = 0, dist[outros] = ∞
-- Enquanto houver vértices não visitados:
-  - Dequeue vértice u com menor dist[u]
-  - Atualizar dist dos vizinhos de u
-```
-
-**Complexidade**:
-- Tempo: O((V+E) log V)
-- Espaço: O(V)
-
----
-
-## 📝 Diagramas UML
-
-Diagrama de Classes (veja em `/docs/uml/class_diagram.puml`):
-- Classes de modelo (Aresta, GrafoDirecionado)
-- Classes de algoritmo (AlgoritmosGrafo)
-- Classes de aplicação (Main, ExemploGrafo)
-- Classes de persistência (GrafoStorage)
-
-Outros diagramas disponíveis:
-- **Sequência**: Execução do algoritmo Warshall
-- **Componentes**: Estrutura de módulos
-- **Casos de Uso**: Funcionalidades do sistema
-- **Implantação**: Ambiente de execução
-
----
-
-## 🧪 Exemplo de Uso
-
-### Criar e testar um grafo
+## Exemplo De Uso
 
 ```java
-// Criar grafo com 5 vértices
-GrafoDirecionado grafo = new GrafoDirecionado(5);
+DirectedGraph graph = new DirectedGraph(5);
 
-// Adicionar arestas
-grafo.cria_adjacencia(0, 1, 5.0, "aresta_A");
-grafo.cria_adjacencia(1, 2, 2.0);
-grafo.cria_adjacencia(2, 3, 4.0);
+graph.createEdge(0, 1, 5.0, "edge_A");
+graph.createEdge(1, 2, 2.0);
+graph.createEdge(2, 3, 4.0);
 
-// Executar Warshall
-boolean[][] alcancabilidade = AlgoritmosGrafo.warshall(grafo);
+boolean[][] reachability = GraphAlgorithms.warshall(graph);
 
-// Salvar em arquivo
-GrafoStorage.salvarGrafo(grafo, "meu_grafo");
-
-// Carregar do arquivo
-GrafoDirecionado carregado = GrafoStorage.carregarGrafo("meu_grafo");
+GraphStorage.saveGraph(graph, "my_graph");
+DirectedGraph loaded = GraphStorage.loadGraph("my_graph");
 ```
 
----
+## Observacoes De Qualidade
 
-## 📚 Documentação Adicional
+- A documentacao pode ficar em portugues por decisao do usuario.
+- Codigo, classes, metodos, pacotes e nomes de arquivos devem permanecer em ingles.
+- A validacao atual e manual via `ExampleGraph`.
+- Ainda nao ha testes automatizados com JUnit.
+- `output/` pode conter artefatos compilados antigos; nao limpe sem confirmacao.
 
-- **START_HERE.md** - Guia rápido de início
-- **docs/design.md** - Detalhes de arquitetura e design
-- **docs/plan.md** - Plano de implementação
-- **docs/knowledge/** - Base de conhecimento estruturada
-- **docs/uml/** - Diagramas em PlantUML
+## Documentacao
 
----
-
-## ✅ Checklist de Completude
-
-### TDE 1 - Graph Implementation
-- [x] Classe Aresta com equals() e hashCode()
-- [x] Classe GrafoDirecionado com adjacência
-- [x] Algoritmo BFS
-- [x] Algoritmo DFS
-- [x] Algoritmo Dijkstra
-- [x] Exemplo de uso (ExemploGrafo)
-
-### TDE 2 - Warshall & Persistência
-- [x] Algoritmo Warshall
-- [x] Matriz de alcançabilidade
-- [x] Save/Load em .bin
-- [x] Menu interativo
-- [x] Documentação completa
-
-### Qualidade de Código
-- [x] Sem raw types
-- [x] Nomes em camelCase
-- [x] Javadoc para métodos públicos
-- [x] Tratamento de exceções
-- [x] Seguir SOLID e OOP
-
-### Documentação
-- [x] README.md com badges
-- [x] Diagramas UML (PlantUML)
-- [x] Especificações de algoritmos
-- [x] Guia de uso
-- [x] Estrutura de pacotes
-
----
-
-## 🔧 Tecnologias
-
-| Tecnologia | Versão | Uso |
-|-----------|--------|-----|
-| Java | 8+ | Linguagem principal |
-| PlantUML | - | Diagramas UML |
-| Markdown | - | Documentação |
-| Git | - | Controle de versão |
-
----
-
-## 📄 Licença
-
-MIT License - Veja arquivo LICENSE para detalhes
-
----
-
-## 🤝 Autor
-
-**Jafte Carneiro Fagundes da Silva**
-- Discente: Ciência da Computação
-- Disciplina: Resolução de Problemas com Grafos
-- Data: Maio 2026
-
----
-
-## 📞 Suporte
-
-Para dúvidas sobre implementação:
-1. Consulte START_HERE.md
-2. Veja exemplos em ExemploGrafo.java
-3. Explore diagramas em /docs/uml
-4. Revise documentação em /docs/design.md
-
----
-
-**Status**: ✅ Projeto completo e pronto para entrega
-
+- `START_HERE.md` - entrada rapida.
+- `AGENTS.md` - ponte para regras de agente.
+- `agents/agents.md` - regras completas de agente.
+- `docs/design.md` - arquitetura e contratos reais.
+- `docs/plan.md` - plano concluido do TDE 2.
+- `docs/tasks.md` - tarefas e checklist.
+- `docs/memory.md` - decisoes e contexto duravel.
+- `docs/knowledge/KNOWLEDGE_BASE.md` - mapa da documentacao.

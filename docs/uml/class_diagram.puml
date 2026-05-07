@@ -1,105 +1,101 @@
 @startuml GraphTasksTDEs_ClassDiagram
 !theme plain
-title Diagrama de Classes - Sistema de Grafos
+title Class Diagram - GraphTasksTDEs
 
 package "br.edu.grafo.model" {
-    class Aresta {
-        - destino: int
-        - peso: double
-        - rotulo: String
+    class Edge {
+        - destination: int
+        - weight: double
+        - label: String
         --
-        + Aresta(int, double, String)
-        + Aresta(int, double)
-        + getDestino(): int
-        + getPeso(): double
-        + getRotulo(): String
+        + Edge(int, double, String)
+        + Edge(int, double)
+        + getDestination(): int
+        + setDestination(int): void
+        + getWeight(): double
+        + setWeight(double): void
+        + getLabel(): String
+        + setLabel(String): void
         + toString(): String
-        + equals(Object): boolean
-        + hashCode(): int
     }
 
-    class GrafoDirecionado {
-        - listaAdjacencia: List<Aresta>[]
-        - informacoesVertices: String[]
+    class DirectedGraph {
+        - adjacencyList: List<Edge>[]
+        - vertexInformation: String[]
         - numVertices: int
         --
-        + GrafoDirecionado(int)
-        + cria_adjacencia(int, int, double)
-        + cria_adjacencia(int, int, double, String)
-        + remove_adjacencia(int, int)
-        + imprime_adjacencias()
-        + seta_informacao(int, String)
-        + adjacentes(int, int[]): int
-        + existeAresta(int, int): boolean
-        + getAresta(int, int): Optional<Aresta>
-        + getAdjacencias(int): List<Aresta>
+        + DirectedGraph(int)
+        + createEdge(int, int, double): void
+        + createEdge(int, int, double, String): void
+        + removeEdge(int, int): void
+        + printAdjacencies(): void
+        + setInformation(int, String): void
+        + getAdjacentVertices(int, int[]): int
+        + hasEdge(int, int): boolean
+        + getEdge(int, int): Optional<Edge>
+        + getAdjacencies(int): List<Edge>
         + getNumVertices(): int
-        + getInformacao(int): String
+        + getInformation(int): String
     }
 }
 
 package "br.edu.grafo.algorithm" {
-    class AlgoritmosGrafo {
-        {static} + warshall(GrafoDirecionado): boolean[][]
-        {static} + imprimeMatrizBooleana(boolean[][], String)
-        {static} + imprimeEstatisticasAlcancabilidade(boolean[][], String)
+    class GraphAlgorithms {
+        {static} + warshall(DirectedGraph): boolean[][]
+        {static} + printBooleanMatrix(boolean[][], String): void
+        {static} + printReachabilityStatistics(boolean[][], String): void
     }
 }
 
+package "br.edu.grafo.application" {
+    class GraphApplicationService {
+        - grafo: DirectedGraph
+        --
+        + createGraph(int): void
+        + addEdge(int, int, double, String): void
+        + removeEdge(int, int): void
+        + executeBFS(int): List<Integer>
+        + executeDFS(int): List<Integer>
+        + executeDijkstra(int): double[]
+        + executeWarshall(): boolean[][]
+        + saveGraph(String): void
+        + loadGraph(String): DirectedGraph
+    }
+}
+
+package "br.edu.grafo.interfaces" {
+    class GraphConsoleUI
+}
+
 package "br.edu.grafo.util" {
-    class GrafoStorage {
-        {static} + salvarGrafo(GrafoDirecionado, String): boolean
-        {static} + carregarGrafo(String): GrafoDirecionado
-        {static} + arquivoExiste(String): boolean
-        {static} + listarGrafos(): String[]
+    class GraphStorage {
+        {static} + saveGraph(DirectedGraph, String): boolean
+        {static} + loadGraph(String): DirectedGraph
+        {static} + fileExists(String): boolean
+        {static} + listGraphs(): String[]
     }
 }
 
 package "br.edu.grafo.app" {
     class Main {
-        - grafo: GrafoDirecionado
-        - scanner: Scanner
-        --
-        {static} + main(String[])
-        - criarGrafo(): GrafoDirecionado
-        - mostrarMenu(): boolean
-        - adicionarAresta()
-        - removerAresta()
-        - executarBFS()
-        - executarDFS()
-        - executarDijkstra()
-        - executarWarshall()
-        - salvarGrafo()
-        - carregarGrafo()
+        {static} + main(String[]): void
     }
 
-    class ExemploGrafo {
-        {static} + main(String[])
+    class ExampleGraph {
+        {static} + main(String[]): void
     }
 }
 
-' Relacionamentos
-GrafoDirecionado "1" *-- "*" Aresta: contém
-AlgoritmosGrafo --> GrafoDirecionado: utiliza
-GrafoStorage --> GrafoDirecionado: persiste
-Main --> GrafoDirecionado: gerencia
-Main --> AlgoritmosGrafo: executa
-Main --> GrafoStorage: salva/carrega
-ExemploGrafo --> GrafoDirecionado: demonstra
-
-note right of Aresta
-  Implementa Serializable
-  para persistência em .bin
-end note
-
-note right of GrafoDirecionado
-  Implementa Serializable
-  para persistência em .bin
-end note
-
-note right of GrafoStorage
-  Gerencia arquivos .bin
-  em diretório /data
-end note
+DirectedGraph "1" *-- "*" Edge
+GraphAlgorithms --> DirectedGraph
+GraphApplicationService --> DirectedGraph
+GraphApplicationService --> GraphAlgorithms
+GraphApplicationService --> GraphStorage
+GraphConsoleUI --> DirectedGraph
+GraphStorage --> DirectedGraph
+Main --> GraphApplicationService
+Main --> GraphConsoleUI
+ExampleGraph --> DirectedGraph
+ExampleGraph --> GraphAlgorithms
 
 @enduml

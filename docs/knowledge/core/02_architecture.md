@@ -3,267 +3,117 @@
 > Status: Active
 > Authority: Tier 2 - Core Knowledge
 > Last Updated: 2026-05-07
+> Owner: Jafte Carneiro Fagundes da Silva
 
-## System Architecture
+## Visao Geral
 
-The GraphTasksTDEs system is organized in three layers:
+A arquitetura atual usa pacotes separados para modelo, algoritmos, servico de aplicacao, interface de console, persistencia e entradas executaveis.
 
-```
-┌──────────────────────────────────────────┐
-│     Application Layer                     │
-│     ExemploGrafo (Usage & Testing)        │
-├──────────────────────────────────────────┤
-│     Algorithm Layer                       │
-│     AlgoritmosGrafo (Stateless utilities) │
-│     - BFS                                 │
-│     - DFS                                 │
-│     - Dijkstra                            │
-│     - Warshall                            │
-├──────────────────────────────────────────┤
-│     Domain Layer                          │
-│     Aresta (Edge)                         │
-│     GrafoDirecionado (Graph)              │
-├──────────────────────────────────────────┤
-```
+## Estrutura De Pacotes
 
-### Responsibilities by Layer
-
-#### Domain Layer
-- **Purpose**: Model core concepts (Edge, Graph)
-- **Responsibility**: Represent graph structure and state
-- **Dependencies**: None (isolated from algorithms and application)
-
-#### Algorithm Layer
-- **Purpose**: Implement graph algorithms
-- **Responsibility**: Compute properties on graphs (traversals, shortest paths, reachability)
-- **Dependencies**: Domain layer (read-only, no modification)
-- **Pattern**: Static utility methods (stateless)
-
-#### Application Layer
-- **Purpose**: Demonstrate and test system
-- **Responsibility**: Create graphs, invoke algorithms, display results
-- **Dependencies**: Domain and algorithm layers
-- **Pattern**: Procedural example program
-
-## Module Structure
-
-```
-GraphTasksTDEs/
-├── AGENTS.md                    # AI agent rules
-├── START_HERE.md                # Project entry point
-├── Aresta.java                  # Edge model (domain)
-├── GrafoDirecionado.java        # Graph model (domain)
-├── AlgoritmosGrafo.java         # Algorithms (algorithm layer)
-├── ExemploGrafo.java            # Example/test (application layer)
-├── docs/                        # Documentation
-│   ├── plan.md
-│   ├── tasks.md
-│   ├── design.md
-│   ├── memory.md
-│   └── knowledge/
-│       ├── KNOWLEDGE_BASE.md
-│       ├── core/
-│       │   ├── 00_project_context.md
-│       │   ├── 01_domain_model.md
-│       │   └── 02_architecture.md
-│       ├── source-of-truth/
-│       ├── implementation/
-│       ├── meetings/
-│       └── archive/
+```text
+src/br/edu/grafo/
+├── model/
+│   ├── Edge.java
+│   └── DirectedGraph.java
+├── algorithm/
+│   └── GraphAlgorithms.java
+├── application/
+│   └── GraphApplicationService.java
+├── interfaces/
+│   └── GraphConsoleUI.java
+├── util/
+│   └── GraphStorage.java
+└── app/
+    ├── Main.java
+    └── ExampleGraph.java
 ```
 
-## Dependency Graph
+## Responsabilidades
 
-```
-ExemploGrafo
-  ├→ GrafoDirecionado (create and manipulate)
-  ├→ Aresta (inspect via algorithms)
-  └→ AlgoritmosGrafo (invoke algorithms)
-      └→ GrafoDirecionado (read-only)
-          └→ Aresta (read-only)
-```
+| Pacote | Responsabilidade |
+| --- | --- |
+| `model` | Estado e estrutura do grafo. |
+| `algorithm` | Algoritmos estaticos independentes do menu. |
+| `application` | Casos de uso e orquestracao. |
+| `interfaces` | Interacao de console. |
+| `util` | Persistencia local. |
+| `app` | Entradas executaveis. |
 
-**Dependency Rules**:
-1. Algorithms depend on domain (one-way)
-2. Application depends on algorithms and domain (one-way)
-3. Domain has no dependencies (isolated)
-4. No circular dependencies
+## Dependencias
 
-## Class Responsibilities
-
-### Aresta (Edge)
-
-**Single Responsibility**: Represent a directed edge with weight and label
-
-**Public Interface**:
-- Getters: `getDestino()`, `getPeso()`, `getRotulo()`
-- Value semantics: `equals()`, `hashCode()`, `toString()`
-
-**Design Notes**:
-- Immutable (private fields, no setters)
-- Equality based on destination (for edge uniqueness checks)
-- No knowledge of containing graph or algorithms
-
-### GrafoDirecionado (Graph)
-
-**Single Responsibility**: Represent graph structure and maintain invariants
-
-**Public Interface**:
-- Mutation: `criaAdjacencia()`, `removeAdjacencia()`
-- Query: `adjacentes()`, `existeAresta()`, `getAresta()`, `grauSaida()`, `grauEntrada()`
-- Display: `imprimeMatriz()`, `imprimeLista()`, `toString()`
-- Vertex info: `setaInformacao()`, `getInformacao()`
-
-**Design Notes**:
-- Maintains adjacency list internal structure
-- Validates vertex indices before operations
-- Throws exceptions for programming errors
-- Handles edge cases (duplicate edges, missing edges)
-- Provides multiple access patterns (array-based legacy + list-based modern)
-
-### AlgoritmosGrafo (Algorithms)
-
-**Single Responsibility**: Provide reusable graph algorithm implementations
-
-**Public Interface**:
-- Static methods: `bfs()`, `dfs()`, `dijkstra()`, `warshall()`
-- Pure functions (no state, deterministic)
-
-**Design Notes**:
-- Stateless (no instance fields)
-- Read-only access to graph (no modifications)
-- Validates input vertex indices
-- Returns well-defined results (lists, arrays, matrices)
-- Private helper methods for internal recursion
-
-### ExemploGrafo (Example)
-
-**Single Responsibility**: Demonstrate system functionality and test correctness
-
-**Public Interface**:
-- Static `main()` method
-
-**Design Notes**:
-- Procedural style (educational)
-- Shows all major features
-- Includes example output for manual verification
-- Documents expected results
-
-## Design Patterns
-
-| Pattern | Where | Why |
-|---------|-------|-----|
-| **Strategy** | AlgoritmosGrafo methods | Interchangeable algorithms for same problem |
-| **Adapter** | Optional<Aresta> return | Null-safe API |
-| **Template Method** | None (stateless utility) | Not applicable |
-| **Factory** | Graph construction in ExemploGrafo | Clean object creation |
-
-## Data Flow Examples
-
-### Creating and Traversing a Graph
-
-```
-User Code
-  ↓
-  Create: new GrafoDirecionado(5)
-    ↓ (domain initialization)
-    Create empty adjacency lists
-  ↓
-  Add Edges: criaAdjacencia(0, 1, 5.0)
-    ↓ (validation)
-    Check vertex validity
-    Check for duplicates
-    ↓ (create edge)
-    Create Aresta(1, 5.0)
-    ↓ (store)
-    Add to listaAdjacencia[0]
-  ↓
-  Traverse: bfs(graph, 0)
-    ↓ (algorithm)
-    Initialize visited[], queue
-    Dequeue vertices level-by-level
-    Return result List<Integer>
-  ↓
-  Display: Print or process results
+```mermaid
+flowchart TD
+    Main --> GraphConsoleUI
+    Main --> GraphApplicationService
+    ExampleGraph --> DirectedGraph
+    ExampleGraph --> GraphAlgorithms
+    GraphConsoleUI --> DirectedGraph
+    GraphApplicationService --> DirectedGraph
+    GraphApplicationService --> GraphAlgorithms
+    GraphApplicationService --> GraphStorage
+    GraphAlgorithms --> DirectedGraph
+    DirectedGraph --> Edge
+    GraphStorage --> DirectedGraph
 ```
 
-### Dijkstra Shortest Path Computation
+## Camadas
 
-```
-User Code
-  ↓
-  dijkstra(graph, source)
-    ↓ (algorithm setup)
-    Initialize dist[], visited[], PriorityQueue
-    ↓ (main loop)
-    while PriorityQueue not empty:
-      Dequeue (distance, vertex)
-      Get adjacencies: graph.getAdjacencias(vertex)
-      For each edge:
-        Update distances if improved
-        Enqueue improved neighbors
-    ↓ (return results)
-    Return dist[] array
-  ↓
-  User processes distance array
-```
+### Modelo
 
-## Boundary Definitions
+- `Edge`
+- `DirectedGraph`
 
-### Domain-Algorithm Boundary
+### Algoritmos
 
-- **Algorithms** receive graph as read-only parameter
-- **Algorithms** query graph structure (vertices, edges, adjacencies)
-- **Algorithms** do NOT modify graph
-- **Algorithms** return new data structures (lists, arrays, matrices)
+- `GraphAlgorithms`
 
-### Algorithm-Application Boundary
+Contem:
 
-- **Application** creates and configures graph
-- **Application** invokes algorithms with valid parameters
-- **Application** receives and displays results
-- **Application** handles output formatting
+- `warshall`
+- `printBooleanMatrix`
+- `printReachabilityStatistics`
 
-## Scalability Considerations
+### Aplicacao
 
-### Current Design Assumptions
+- `GraphApplicationService`
 
-- Small graphs (V < 1000)
-- In-memory representation
-- Single-threaded execution
-- No persistence
+Contem:
 
-### Future Evolution Points
+- BFS
+- DFS
+- Dijkstra
+- Operacoes de criar grafo, adicionar/remover aresta, salvar/carregar e executar Warshall.
 
-If system needs to scale:
+### Interface
 
-1. **Large Graphs**: Consider graph compression, sparse matrix formats
-2. **Distributed Graphs**: Add network layer, implement distributed algorithms
-3. **Persistence**: Add repository layer with database/file access
-4. **Performance**: Profile algorithms, optimize critical paths
-5. **Concurrency**: Add thread-safety mechanisms if needed
+- `GraphConsoleUI`
 
-## Testing Boundaries
+Centraliza prompts e exibicao.
 
-### Unit-Level (Implicit)
+### Persistencia
 
-- Domain objects (Aresta, GrafoDirecionado)
-- Algorithm correctness through ExemploGrafo
+- `GraphStorage`
 
-### Integration-Level
+Usa `ObjectOutputStream` e `ObjectInputStream`.
 
-- Algorithm + Graph interaction through ExemploGrafo
-- End-to-end flow from graph creation to algorithm results
+## Fronteiras De Alteracao
 
-### What's NOT Tested
+- Mudancas em comportamento de grafo pertencem a `DirectedGraph`.
+- Mudancas em BFS/DFS/Dijkstra pertencem a `GraphApplicationService`.
+- Mudancas em Warshall pertencem a `GraphAlgorithms`.
+- Mudancas de console pertencem a `GraphConsoleUI`.
+- Mudancas de serializacao pertencem a `GraphStorage`.
 
-- Performance benchmarks (educational context)
-- GUI or visualization
-- Distributed scenarios
-- Concurrent access
+## Gaps Conhecidos
+
+- Nao ha testes automatizados.
+- `output/` pode conter classes antigas e nao deve ser limpo sem confirmacao.
+- A politica de erro nao e uniforme.
+- `Edge` nao e imutavel.
 
 ## Related Documents
 
-- `/docs/design.md` — Class design, UML, algorithm details
-- `/docs/knowledge/core/01_domain_model.md` — Concept definitions
-- `/docs/knowledge/core/00_project_context.md` — Project goals and constraints
+- `docs/design.md`
+- `docs/knowledge/core/00_project_context.md`
+- `docs/knowledge/core/01_domain_model.md`
