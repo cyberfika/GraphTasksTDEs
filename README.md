@@ -108,12 +108,3 @@ boolean[][] reachability = GraphAlgorithms.warshall(graph);
 GraphStorage.saveGraph(graph, "my_graph");
 DirectedGraph loaded = GraphStorage.loadGraph("my_graph");
 ```
-
-## Observacoes De Qualidade
-
-- A documentacao pode ficar em portugues por decisao do usuario.
-- Codigo, classes, metodos, pacotes e nomes de arquivos devem permanecer em ingles.
-- A validacao atual e manual via `ExampleGraph`.
-- Ainda nao ha testes automatizados com JUnit.
-- `output/` pode conter artefatos compilados antigos; nao limpe sem confirmacao.
-
