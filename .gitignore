@@ -1,0 +1,66 @@
+# Compiled class files
+*.class
+/output/
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.zip
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.metadata/
+bin/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+nbproject/
+.nb-gradle/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+.windows
+
+# User-specific
+.claude/
+.env
+.env.local
+*.swp
+*.swo
+*~

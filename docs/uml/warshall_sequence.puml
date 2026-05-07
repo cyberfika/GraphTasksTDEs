@@ -1,0 +1,58 @@
+@startuml Warshall_Sequence
+!theme plain
+title Diagrama de Sequência - Algoritmo de Warshall
+
+participant User
+participant Main
+participant AlgoritmosGrafo
+participant GrafoDirecionado
+
+User -> Main: 8. Executar Warshall
+activate Main
+
+Main -> Main: executarWarshall()
+
+Main -> AlgoritmosGrafo: warshall(grafo)
+activate AlgoritmosGrafo
+
+AlgoritmosGrafo -> AlgoritmosGrafo: Inicializar reach[V][V]
+
+loop Para cada vértice i, j
+    AlgoritmosGrafo -> GrafoDirecionado: existeAresta(i, j)
+    activate GrafoDirecionado
+    GrafoDirecionado --> AlgoritmosGrafo: boolean
+    deactivate GrafoDirecionado
+    AlgoritmosGrafo -> AlgoritmosGrafo: reach[i][j] = existe
+end
+
+AlgoritmosGrafo -> AlgoritmosGrafo: Self-reachability: reach[i][i] = true
+
+loop Para k de 0 a V-1
+    loop Para i de 0 a V-1
+        loop Para j de 0 a V-1
+            AlgoritmosGrafo -> AlgoritmosGrafo: reach[i][j] = reach[i][j] OR\n(reach[i][k] AND reach[k][j])
+        end
+    end
+end
+
+AlgoritmosGrafo --> Main: reach[][]
+deactivate AlgoritmosGrafo
+
+Main -> AlgoritmosGrafo: imprimeMatrizBooleana(reach, "ALCANÇABILIDADE")
+activate AlgoritmosGrafo
+AlgoritmosGrafo --> User: Matriz exibida
+deactivate AlgoritmosGrafo
+
+Main -> AlgoritmosGrafo: imprimeEstatisticasAlcancabilidade(reach, "ESTATÍSTICAS")
+activate AlgoritmosGrafo
+AlgoritmosGrafo --> User: Estatísticas exibidas
+deactivate AlgoritmosGrafo
+
+deactivate Main
+
+note over AlgoritmosGrafo
+  Complexidade: O(V³)
+  Espaço: O(V²)
+end note
+
+@enduml

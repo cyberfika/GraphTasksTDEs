@@ -1,0 +1,105 @@
+@startuml GraphTasksTDEs_ClassDiagram
+!theme plain
+title Diagrama de Classes - Sistema de Grafos
+
+package "br.edu.grafo.model" {
+    class Aresta {
+        - destino: int
+        - peso: double
+        - rotulo: String
+        --
+        + Aresta(int, double, String)
+        + Aresta(int, double)
+        + getDestino(): int
+        + getPeso(): double
+        + getRotulo(): String
+        + toString(): String
+        + equals(Object): boolean
+        + hashCode(): int
+    }
+
+    class GrafoDirecionado {
+        - listaAdjacencia: List<Aresta>[]
+        - informacoesVertices: String[]
+        - numVertices: int
+        --
+        + GrafoDirecionado(int)
+        + cria_adjacencia(int, int, double)
+        + cria_adjacencia(int, int, double, String)
+        + remove_adjacencia(int, int)
+        + imprime_adjacencias()
+        + seta_informacao(int, String)
+        + adjacentes(int, int[]): int
+        + existeAresta(int, int): boolean
+        + getAresta(int, int): Optional<Aresta>
+        + getAdjacencias(int): List<Aresta>
+        + getNumVertices(): int
+        + getInformacao(int): String
+    }
+}
+
+package "br.edu.grafo.algorithm" {
+    class AlgoritmosGrafo {
+        {static} + warshall(GrafoDirecionado): boolean[][]
+        {static} + imprimeMatrizBooleana(boolean[][], String)
+        {static} + imprimeEstatisticasAlcancabilidade(boolean[][], String)
+    }
+}
+
+package "br.edu.grafo.util" {
+    class GrafoStorage {
+        {static} + salvarGrafo(GrafoDirecionado, String): boolean
+        {static} + carregarGrafo(String): GrafoDirecionado
+        {static} + arquivoExiste(String): boolean
+        {static} + listarGrafos(): String[]
+    }
+}
+
+package "br.edu.grafo.app" {
+    class Main {
+        - grafo: GrafoDirecionado
+        - scanner: Scanner
+        --
+        {static} + main(String[])
+        - criarGrafo(): GrafoDirecionado
+        - mostrarMenu(): boolean
+        - adicionarAresta()
+        - removerAresta()
+        - executarBFS()
+        - executarDFS()
+        - executarDijkstra()
+        - executarWarshall()
+        - salvarGrafo()
+        - carregarGrafo()
+    }
+
+    class ExemploGrafo {
+        {static} + main(String[])
+    }
+}
+
+' Relacionamentos
+GrafoDirecionado "1" *-- "*" Aresta: contém
+AlgoritmosGrafo --> GrafoDirecionado: utiliza
+GrafoStorage --> GrafoDirecionado: persiste
+Main --> GrafoDirecionado: gerencia
+Main --> AlgoritmosGrafo: executa
+Main --> GrafoStorage: salva/carrega
+ExemploGrafo --> GrafoDirecionado: demonstra
+
+note right of Aresta
+  Implementa Serializable
+  para persistência em .bin
+end note
+
+note right of GrafoDirecionado
+  Implementa Serializable
+  para persistência em .bin
+end note
+
+note right of GrafoStorage
+  Gerencia arquivos .bin
+  em diretório /data
+end note
+
+@enduml

@@ -1,0 +1,83 @@
+@startuml GraphTasksTDEs_UseCases
+!theme plain
+title Diagrama de Casos de Uso - Sistema de Grafos
+
+actor User
+actor System
+
+rectangle "Graph Management System" {
+    usecase UC1 as "Criar Grafo"
+    usecase UC2 as "Adicionar Aresta"
+    usecase UC3 as "Remover Aresta"
+    usecase UC4 as "Visualizar Matriz"
+    usecase UC5 as "Visualizar Lista"
+    usecase UC6 as "Ver Informações"
+
+    usecase UC7 as "Busca BFS"
+    usecase UC8 as "Busca DFS"
+    usecase UC9 as "Dijkstra (Caminhos Mínimos)"
+    usecase UC10 as "Warshall (Alcançabilidade)"
+
+    usecase UC11 as "Salvar em .bin"
+    usecase UC12 as "Carregar de .bin"
+    usecase UC13 as "Listar Grafos Salvos"
+}
+
+' Usuário com casos de uso
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+User --> UC10
+User --> UC11
+User --> UC12
+User --> UC13
+
+' Associações internas
+UC2 .down.> UC1: depende
+UC3 .down.> UC1: depende
+UC4 .down.> UC1: depende
+UC5 .down.> UC1: depende
+UC6 .down.> UC1: depende
+UC7 .down.> UC1: depende
+UC8 .down.> UC1: depende
+UC9 .down.> UC1: depende
+UC10 .down.> UC1: depende
+UC11 .down.> UC1: depende
+UC12 .right.> UC11: <extends>
+
+' Inclusões
+UC13 ..> UC12: <include>
+
+note right of UC7
+  BFS - Busca em Largura
+  O(V+E)
+end note
+
+note right of UC8
+  DFS - Busca em Profundidade
+  O(V+E)
+end note
+
+note right of UC9
+  Dijkstra - Caminho Mínimo
+  O((V+E) log V)
+end note
+
+note right of UC10
+  Warshall - Matriz de
+  Alcançabilidade (Fechamento
+  Transitivo) - O(V³)
+end note
+
+note right of UC11
+  Persiste grafo em
+  arquivo binário em /data
+end note
+
+@enduml

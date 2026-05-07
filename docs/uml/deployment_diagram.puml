@@ -1,0 +1,59 @@
+@startuml GraphTasksTDEs_Deployment
+!theme plain
+title Diagrama de Implantação - Sistema de Grafos
+
+node "Developer Machine" as DevMachine {
+    artifact "Source Code (src/)" as SourceCode
+    artifact "Documentation (docs/)" as Docs
+    artifact "Build Scripts" as BuildScripts
+}
+
+node "Java Runtime Environment" as JRE {
+    artifact "Compiled Classes (output/)" as CompiledClasses
+    artifact "JVM" as JVM
+}
+
+node "File System" as FileSystem {
+    folder "Binary Data" as DataDir {
+        file "*.bin files" as BinFiles
+    }
+    folder "Project Root" as ProjRoot {
+        file ".gitignore" as GitIgnore
+        file "START_HERE.md" as StartHere
+        file "README.md" as Readme
+    }
+}
+
+database "Graph Data Storage" as Storage {
+    table "Saved Graphs" as SavedGraphs
+}
+
+SourceCode -.-> CompiledClasses: javac compile
+CompiledClasses -.-> JVM: java execute
+JVM -.-> DataDir: read/write .bin
+DataDir -.-> Storage: persist
+
+SourceCode --> Docs: documents
+BuildScripts -.-> CompiledClasses: automate compilation
+
+note right of JVM
+  Java 8+
+  Packages:
+  - br.edu.grafo.model
+  - br.edu.grafo.algorithm
+  - br.edu.grafo.util
+  - br.edu.grafo.app
+end note
+
+note right of DataDir
+  Location: /data
+  Files saved by GrafoStorage
+  Format: Java Serialized Objects
+end note
+
+note right of Storage
+  In-memory + persistent
+  Loaded via ObjectInputStream
+end note
+
+@enduml

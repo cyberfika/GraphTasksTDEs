@@ -1,0 +1,68 @@
+@startuml GraphTasksTDEs_Components
+!theme plain
+title Diagrama de Componentes - Sistema de Grafos
+
+package "Application Layer" {
+    component [Menu Interface] as MenuInterface
+    component [Example Program] as ExemploComp
+}
+
+package "Algorithm Layer" {
+    component [Graph Algorithms] as Algorithms
+}
+
+package "Domain Layer" {
+    component [Graph Model] as GraphModel
+    component [Edge Model] as EdgeModel
+}
+
+package "Persistence Layer" {
+    component [Storage Manager] as Storage
+}
+
+database [File System] {
+    folder "Binary Files (.bin)" as DataFolder
+}
+
+' Interfaces
+interface "IGraphService" as IGraph
+interface "IStorage" as IStore
+interface "IAlgorithm" as IAlgo
+
+' Relações
+MenuInterface --|> IGraph
+MenuInterface --|> IStore
+MenuInterface --|> IAlgo
+ExemploComp --|> IGraph
+ExemploComp --|> IAlgo
+
+GraphModel --|> IGraph
+EdgeModel --|> IGraph
+
+Algorithms --|> IAlgo
+Algorithms --> GraphModel: utiliza
+
+Storage --|> IStore
+Storage --> DataFolder: lê/escreve
+
+GraphModel o-- EdgeModel: contém
+Storage -.-> GraphModel: serializa
+
+note right of MenuInterface
+  Interface interativa
+  com 11 opções de menu
+end note
+
+note right of Algorithms
+  - Warshall (O(V³))
+  - Dijkstra (O((V+E)log V))
+  - BFS (O(V+E))
+  - DFS (O(V+E))
+end note
+
+note right of Storage
+  Salva/carrega .bin files
+  no diretório /data
+end note
+
+@enduml
