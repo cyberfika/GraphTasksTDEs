@@ -117,13 +117,3 @@ DirectedGraph loaded = GraphStorage.loadGraph("my_graph");
 - Ainda nao ha testes automatizados com JUnit.
 - `output/` pode conter artefatos compilados antigos; nao limpe sem confirmacao.
 
-## Documentacao
-
-- `START_HERE.md` - entrada rapida.
-- `AGENTS.md` - ponte para regras de agente.
-- `agents/agents.md` - regras completas de agente.
-- `docs/design.md` - arquitetura e contratos reais.
-- `docs/plan.md` - plano concluido do TDE 2.
-- `docs/tasks.md` - tarefas e checklist.
-- `docs/memory.md` - decisoes e contexto duravel.
-- `docs/knowledge/KNOWLEDGE_BASE.md` - mapa da documentacao.
