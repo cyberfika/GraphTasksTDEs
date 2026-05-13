@@ -6,17 +6,12 @@ import br.edu.grafo.application.GraphService;
 import br.edu.grafo.application.ShortestPathResult;
 import br.edu.grafo.interfaces.GraphConsoleUI;
 import br.edu.grafo.model.DirectedGraph;
-import br.edu.grafo.model.Edge;
 import br.edu.grafo.util.CuritibaWalkGraphFactory;
 import br.edu.grafo.util.SolarSystemGraphFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Ponto de entrada para o sistema de grafos.
@@ -156,10 +151,7 @@ public class Main {
     }
 
     private static void createNewGraph(GraphConsoleUI ui, GraphService service) {
-        int numVertices = ui.askNumVertices();
-        if (numVertices > 0) {
-            service.createGraph(numVertices);
-        }
+        ui.askNumVertices().ifPresent(service::createGraph);
     }
 
     private static void handleAddEdge(GraphConsoleUI ui, GraphService service) {
@@ -179,7 +171,7 @@ public class Main {
     }
 
     private static void handleRemoveEdge(GraphConsoleUI ui, GraphService service) {
-        List<EdgeDisplayItem> edges = listEdgesForDisplay(service.getGraph());
+        List<EdgeDisplayItem> edges = service.listEdges();
         if (edges.isEmpty()) {
             ui.displayNoEdgesToRemove();
             return;
@@ -202,17 +194,13 @@ public class Main {
     }
 
     private static void handleBFS(GraphConsoleUI ui, GraphService service) {
-        int source = ui.askBFSSourceVertex(service.getGraph().getNumVertices());
-        if (source >= 0) {
-            ui.displayBFSResult(service.executeBFS(source));
-        }
+        ui.askBFSSourceVertex(service.getGraph().getNumVertices())
+                .ifPresent(source -> ui.displayBFSResult(service.executeBFS(source)));
     }
 
     private static void handleDFS(GraphConsoleUI ui, GraphService service) {
-        int source = ui.askDFSSourceVertex(service.getGraph().getNumVertices());
-        if (source >= 0) {
-            ui.displayDFSResult(service.executeDFS(source));
-        }
+        ui.askDFSSourceVertex(service.getGraph().getNumVertices())
+                .ifPresent(source -> ui.displayDFSResult(service.executeDFS(source)));
     }
 
     private static void handleDijkstra(GraphConsoleUI ui, GraphService service) {
@@ -220,10 +208,8 @@ public class Main {
             handleNamedShortestPath(ui, service);
             return;
         }
-        int source = ui.askDijkstraSourceVertex(service.getGraph().getNumVertices());
-        if (source >= 0) {
-            ui.displayDijkstraResult(service.executeDijkstra(source), source);
-        }
+        ui.askDijkstraSourceVertex(service.getGraph().getNumVertices())
+                .ifPresent(source -> ui.displayDijkstraResult(service.executeDijkstra(source), source));
     }
 
     private static void handleWarshall(GraphConsoleUI ui, GraphService service) {
@@ -297,46 +283,6 @@ public class Main {
             return input;
         }
         return null;
-    }
-
-    // --- Listagem de arestas para remocao ---
-
-    private static List<EdgeDisplayItem> listEdgesForDisplay(DirectedGraph graph) {
-        List<EdgeDisplayItem> items = new ArrayList<>();
-        Set<String> processedBidirectional = new HashSet<>();
-
-        for (int origin = 0; origin < graph.getNumVertices(); origin++) {
-            for (Edge edge : graph.getAdjacencies(origin)) {
-                int destination = edge.getDestination();
-                boolean bidirectional = isSymmetricConnection(graph, origin, edge);
-
-                if (bidirectional) {
-                    String key = buildBidirectionalKey(origin, destination, edge);
-                    if (processedBidirectional.contains(key)) {
-                        continue;
-                    }
-                    processedBidirectional.add(key);
-                }
-
-                items.add(new EdgeDisplayItem(origin, destination, edge.getWeight(), edge.getLabel(), bidirectional));
-            }
-        }
-        return items;
-    }
-
-    private static boolean isSymmetricConnection(DirectedGraph graph, int origin, Edge edge) {
-        Optional<Edge> reverse = graph.getEdge(edge.getDestination(), origin);
-        if (!reverse.isPresent()) return false;
-
-        Edge reverseEdge = reverse.get();
-        return Double.compare(edge.getWeight(), reverseEdge.getWeight()) == 0
-                && Objects.equals(edge.getLabel(), reverseEdge.getLabel());
-    }
-
-    private static String buildBidirectionalKey(int origin, int destination, Edge edge) {
-        int a = Math.min(origin, destination);
-        int b = Math.max(origin, destination);
-        return a + ":" + b + ":" + edge.getWeight() + ":" + edge.getLabel();
     }
 
     private static boolean hasNamedVertices(DirectedGraph graph) {

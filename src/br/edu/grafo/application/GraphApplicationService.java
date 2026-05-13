@@ -302,6 +302,44 @@ public class GraphApplicationService implements GraphService {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }
 
+    // --- Display de arestas ---
+
+    @Override
+    public List<EdgeDisplayItem> listEdges() {
+        List<EdgeDisplayItem> items = new ArrayList<>();
+        Set<String> processedBidirectional = new HashSet<>();
+
+        for (int origin = 0; origin < graph.getNumVertices(); origin++) {
+            for (Edge edge : graph.getAdjacencies(origin)) {
+                int destination = edge.getDestination();
+                boolean bidirectional = isSymmetricEdge(origin, edge);
+
+                if (bidirectional) {
+                    String key = buildEdgeKey(origin, destination, edge);
+                    if (!processedBidirectional.add(key)) {
+                        continue;
+                    }
+                }
+
+                items.add(new EdgeDisplayItem(origin, destination, edge.getWeight(), edge.getLabel(), bidirectional));
+            }
+        }
+        return items;
+    }
+
+    private boolean isSymmetricEdge(int origin, Edge edge) {
+        Optional<Edge> reverse = graph.getEdge(edge.getDestination(), origin);
+        return reverse.isPresent()
+                && Double.compare(reverse.get().getWeight(), edge.getWeight()) == 0
+                && Objects.equals(reverse.get().getLabel(), edge.getLabel());
+    }
+
+    private String buildEdgeKey(int origin, int destination, Edge edge) {
+        int a = Math.min(origin, destination);
+        int b = Math.max(origin, destination);
+        return a + ":" + b + ":" + edge.getWeight() + ":" + edge.getLabel();
+    }
+
     // --- Classe auxiliar para Dijkstra ---
 
     private static final class VertexDistance implements Comparable<VertexDistance> {

@@ -11,11 +11,8 @@ import br.edu.grafo.model.Edge;
 import br.edu.grafo.util.CuritibaWalkGraphFactory;
 import br.edu.grafo.util.SolarSystemGraphFactory;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -39,6 +36,10 @@ public class GraphGuiController {
 
     public GraphGuiController() {
         this.service = new GraphApplicationService();
+    }
+
+    public GraphGuiController(GraphService service) {
+        this.service = service;
     }
 
     // --- Acesso ao grafo ---
@@ -132,38 +133,7 @@ public class GraphGuiController {
     // --- Listagem de arestas ---
 
     public List<EdgeDisplayItem> listEdges() {
-        List<EdgeDisplayItem> items = new ArrayList<>();
-        Set<String> processedBidirectional = new HashSet<>();
-
-        for (int origin = 0; origin < graph().getNumVertices(); origin++) {
-            for (Edge edge : graph().getAdjacencies(origin)) {
-                int destination = edge.getDestination();
-                boolean bidirectional = isSymmetric(origin, edge);
-
-                if (bidirectional) {
-                    String key = buildBidirectionalKey(origin, destination, edge);
-                    if (!processedBidirectional.add(key)) {
-                        continue;
-                    }
-                }
-
-                items.add(new EdgeDisplayItem(origin, destination, edge.getWeight(), edge.getLabel(), bidirectional));
-            }
-        }
-        return items;
-    }
-
-    private boolean isSymmetric(int origin, Edge edge) {
-        Optional<Edge> reverse = graph().getEdge(edge.getDestination(), origin);
-        return reverse.isPresent()
-                && Double.compare(reverse.get().getWeight(), edge.getWeight()) == 0
-                && Objects.equals(reverse.get().getLabel(), edge.getLabel());
-    }
-
-    private String buildBidirectionalKey(int origin, int destination, Edge edge) {
-        int a = Math.min(origin, destination);
-        int b = Math.max(origin, destination);
-        return a + ":" + b + ":" + edge.getWeight() + ":" + edge.getLabel();
+        return service.listEdges();
     }
 
     // --- Consulta de vertices ---

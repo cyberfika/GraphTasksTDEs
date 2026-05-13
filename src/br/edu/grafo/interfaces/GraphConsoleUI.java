@@ -8,6 +8,7 @@ import br.edu.grafo.model.Edge;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Scanner;
 
 /**
@@ -49,19 +50,19 @@ public class GraphConsoleUI {
 
     // --- Criacao de grafo ---
 
-    public int askNumVertices() {
+    public OptionalInt askNumVertices() {
         System.out.print("How many vertices? (1-100): ");
         try {
             int num = Integer.parseInt(scanner.nextLine().trim());
             if (num < 1 || num > 100) {
                 System.out.println("Error: vertices must be between 1 and 100!");
-                return -1;
+                return OptionalInt.empty();
             }
             System.out.println("Graph created with " + num + " vertices\n");
-            return num;
+            return OptionalInt.of(num);
         } catch (NumberFormatException e) {
             System.out.println("Error: invalid input!");
-            return -1;
+            return OptionalInt.empty();
         }
     }
 
@@ -266,7 +267,7 @@ public class GraphConsoleUI {
 
     // --- Algoritmos de busca ---
 
-    public int askBFSSourceVertex(int maxVertex) {
+    public OptionalInt askBFSSourceVertex(int maxVertex) {
         return askAlgorithmSourceVertex("BREADTH-FIRST SEARCH (BFS)", maxVertex);
     }
 
@@ -275,7 +276,7 @@ public class GraphConsoleUI {
         System.out.println("  Vertices visited: " + visited.size() + "\n");
     }
 
-    public int askDFSSourceVertex(int maxVertex) {
+    public OptionalInt askDFSSourceVertex(int maxVertex) {
         return askAlgorithmSourceVertex("DEPTH-FIRST SEARCH (DFS)", maxVertex);
     }
 
@@ -284,7 +285,7 @@ public class GraphConsoleUI {
         System.out.println("  Vertices visited: " + visited.size() + "\n");
     }
 
-    public int askDijkstraSourceVertex(int maxVertex) {
+    public OptionalInt askDijkstraSourceVertex(int maxVertex) {
         return askAlgorithmSourceVertex("DIJKSTRA - SHORTEST PATH", maxVertex);
     }
 
@@ -528,14 +529,14 @@ public class GraphConsoleUI {
         return connections.size();
     }
 
-    private int askAlgorithmSourceVertex(String algorithm, int maxVertex) {
+    private OptionalInt askAlgorithmSourceVertex(String algorithm, int maxVertex) {
         System.out.println("\n=== " + algorithm + " ===");
         System.out.print("Source vertex (0-" + (maxVertex - 1) + "): ");
         try {
-            return Integer.parseInt(scanner.nextLine().trim());
+            return OptionalInt.of(Integer.parseInt(scanner.nextLine().trim()));
         } catch (NumberFormatException e) {
             System.out.println("Error: invalid input!");
-            return -1;
+            return OptionalInt.empty();
         }
     }
 

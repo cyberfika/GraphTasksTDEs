@@ -1,22 +1,21 @@
 package br.edu.grafo.application;
 
-import br.edu.grafo.algorithm.KruskalResult;
 import br.edu.grafo.model.DirectedGraph;
 import java.util.List;
 
 /**
- * Contrato para o servico de aplicacao de grafos.
+ * Contrato facade para o servico de aplicacao de grafos.
  *
- * <p>Encapsula todos os casos de uso do sistema: criacao, edicao,
- * execucao de algoritmos, persistencia e consulta de nomes.
- * Corrige a violacao do Interface Segregation Principle (ISP) e do
- * Dependency Inversion Principle (DIP): clientes de alto nivel
- * dependem desta abstracao, nao de {@code GraphApplicationService} concreto.</p>
+ * <p>Estende {@link AlgorithmService}, {@link GraphPersistenceService} e
+ * {@link VertexQueryService} aplicando o Interface Segregation Principle (ISP):
+ * cada sub-interface pode ser usada de forma independente por clientes que
+ * nao precisam do contrato completo. Clientes de alto nivel que precisam de
+ * tudo dependem desta abstracao (DIP), nao de {@code GraphApplicationService}.</p>
  *
  * @author Jafte Carneiro Fagundes da Silva
- * @version 1.0
+ * @version 2.0
  */
-public interface GraphService {
+public interface GraphService extends AlgorithmService, GraphPersistenceService, VertexQueryService {
 
     // --- Gestao do grafo ativo ---
 
@@ -42,44 +41,11 @@ public interface GraphService {
      */
     boolean removeEdge(int origin, int destination);
 
-    // --- Algoritmos ---
-
-    List<Integer> executeBFS(int sourceVertex);
-
-    List<Integer> executeDFS(int sourceVertex);
-
-    double[] executeDijkstra(int sourceVertex);
-
-    ShortestPathResult executeShortestPath(int source, int destination);
-
-    boolean[][] executeWarshall();
-
-    KruskalResult executeKruskal();
-
-    // --- Persistencia ---
+    // --- Display de arestas ---
 
     /**
-     * Salva o grafo ativo.
-     * @return {@code true} se salvo com sucesso
+     * Lista arestas do grafo ativo para exibicao, deduplicando conexoes bidirecionais.
+     * Logica compartilhada entre console ({@code Main}) e GUI ({@code GraphGuiController}).
      */
-    boolean saveGraph(String name);
-
-    /**
-     * Carrega grafo e define como ativo.
-     * @return {@code true} se carregado com sucesso
-     */
-    boolean loadGraph(String name);
-
-    /**
-     * Lista nomes de grafos salvos.
-     */
-    String[] listSavedGraphs();
-
-    // --- Consulta de vertices ---
-
-    int findVertexByName(String query);
-
-    List<String> listVertexNames();
-
-    List<String> findVertexNameSuggestions(String query);
+    List<EdgeDisplayItem> listEdges();
 }
