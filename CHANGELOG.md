@@ -9,10 +9,14 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - `application/GraphService.java` — interface de contrato para `GraphApplicationService` (DIP, ISP)
+- `application/AlgorithmService.java` — interface ISP para algoritmos puros (ISP, P10b)
+- `application/GraphPersistenceService.java` — interface ISP para persistencia (ISP, P10b)
+- `application/VertexQueryService.java` — interface ISP para consulta de vertices (ISP, P10b)
 - `util/GraphRepository.java` — interface de contrato para `GraphStorage` (DIP)
 - `application/EdgeDisplayItem.java` — DTO imutavel compartilhado entre console e GUI (DRY)
 - `application/GraphType.java` — enum com metadados por tipo de grafo: nome de exibicao, unidade de peso e flag de persistencia (OCP)
 - `docs/quality_improvement_plan.md` — plano de melhoria de qualidade com analise SOLID completa
+- `docs/quality_improvement_plan_complement.md` — pendencias apos primeiro plano
 - `CHANGELOG.md` — este arquivo
 
 ### Changed
@@ -98,6 +102,29 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### `docs/plan.md`, `docs/tasks.md`, `docs/memory.md`
 - Atualizados para refletir estado atual pos-refatoracao
+
+### Complement (quality_improvement_plan_complement.md — P10b, P3b, P2b, P25)
+
+#### `application/GraphService.java`
+- Estende `AlgorithmService`, `GraphPersistenceService`, `VertexQueryService` (ISP, P10b)
+- Metodos migrados para sub-interfaces; body reduzido a gestao do grafo, edicao e `listEdges()`
+- `listEdges()` adicionado — display compartilhado entre console e GUI (DRY, P3b)
+
+#### `application/GraphApplicationService.java`
+- Implementa `listEdges()` com dedup bidirecional; helpers privados `isSymmetricEdge`, `buildEdgeKey` (P3b)
+
+#### `gui/GraphGuiController.java`
+- Construtor `GraphGuiController(GraphService)` adicionado (P2b — injecao de dependencia, testavel com mock)
+- `listEdges()` simplificado para `return service.listEdges()` — remove duplicacao (P3b)
+- Imports `ArrayList`, `Objects`, `Optional` removidos
+
+#### `interfaces/GraphConsoleUI.java`
+- `askNumVertices()`, `askBFSSourceVertex()`, `askDFSSourceVertex()`, `askDijkstraSourceVertex()`, `askAlgorithmSourceVertex()` retornam `OptionalInt` (P25 — elimina sentinela `-1`)
+
+#### `app/Main.java`
+- `listEdgesForDisplay()`, `isSymmetricConnection()`, `buildBidirectionalKey()` removidos; caller usa `service.listEdges()` (P3b)
+- Handlers de BFS/DFS/Dijkstra e `createNewGraph` usam `OptionalInt.ifPresent()` (P25)
+- Imports `Edge`, `ArrayList`, `HashSet`, `Objects`, `Set` removidos
 
 ---
 

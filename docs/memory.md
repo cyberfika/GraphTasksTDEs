@@ -43,6 +43,30 @@
 
 O diagnostico de 2026-05-07 encontrou documentacao stale com nomes antigos como `Aresta`, `GrafoDirecionado`, `AlgoritmosGrafo` e `ExemploGrafo`. O codigo atual usa `Edge`, `DirectedGraph`, `GraphAlgorithms` e `ExampleGraph`.
 
+### 2026-05-13 - Quality Improvement Plan Complement Executado (Parcial)
+
+Base: quality_improvement_plan_complement.md (itens P10b, P3b, P2b, P25).
+
+**Arquivos criados:**
+- `application/AlgorithmService.java` — interface ISP para algoritmos (BFS, DFS, Dijkstra, Warshall, Kruskal)
+- `application/GraphPersistenceService.java` — interface ISP para persistencia (save, load, list)
+- `application/VertexQueryService.java` — interface ISP para consulta de vertices por nome
+
+**Modificacoes:**
+- `GraphService`: estende as 3 novas interfaces (facade ISP); metodos de algoritmos, persistencia e vertices removidos do corpo (herdados); `listEdges()` adicionado (DRY compartilhado)
+- `GraphApplicationService`: implementa `listEdges()` com logica de dedup bidirecional; helpers privados `isSymmetricEdge`, `buildEdgeKey`
+- `GraphGuiController`: construtor `GraphGuiController(GraphService)` adicionado (P2b — testavel com mock); `listEdges()` simplificado para `return service.listEdges()`; imports nao usados removidos (`ArrayList`, `Objects`, `Optional`)
+- `GraphConsoleUI`: `askNumVertices()`, `askBFSSourceVertex()`, `askDFSSourceVertex()`, `askDijkstraSourceVertex()`, `askAlgorithmSourceVertex()` retornam `OptionalInt` (P25 — elimina sentinela `-1`)
+- `Main`: callers atualizados para `OptionalInt.ifPresent()`; `listEdgesForDisplay()`, `isSymmetricConnection()`, `buildBidirectionalKey()` removidos; imports nao usados removidos (`Edge`, `ArrayList`, `HashSet`, `Objects`, `Set`)
+
+**Resultado:** compilacao verificada via PowerShell + javac — zero erros.
+
+**Itens pendentes do complement (requerem aprovacao):**
+- P26/P27: testes automatizados + Maven/Gradle
+- P20b: mover `EdgeInput` para `application` (YAGNI — aguardar uso concreto na GUI)
+- P2c: extrair `EdgeFormatter` de `GraphConsoleUI` (consequencia natural de futuras tarefas)
+- P3c: mover listagem de arestas de `Main` para `GraphConsoleUI` (discordado como tarefa independente)
+
 ## Open Questions
 
 1. O projeto deve receber testes automatizados com JUnit? (requer Maven/Gradle)
