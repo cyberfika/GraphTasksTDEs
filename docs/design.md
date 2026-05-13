@@ -46,6 +46,7 @@ Contratos atuais:
 | --- | --- |
 | `br.edu.grafo.model` | `Edge` e `DirectedGraph`. |
 | `br.edu.grafo.algorithm` | `GraphAlgorithms`, com Warshall e helpers de impressao. |
+| `br.edu.grafo.algorithm` | `KruskalAlgorithm` e `KruskalResult`, para AGM na visao nao direcionada do grafo. |
 | `br.edu.grafo.application` | `GraphApplicationService`, com casos de uso, BFS, DFS e Dijkstra. |
 | `br.edu.grafo.interfaces` | `GraphConsoleUI`, com entrada e saida de console. |
 | `br.edu.grafo.util` | `GraphStorage`, com serializacao Java em `.bin`. |
@@ -86,6 +87,12 @@ classDiagram
         +printReachabilityStatistics(boolean[][], String) void$
     }
 
+    class KruskalAlgorithm {
+        +computeMinimumSpanningTree(DirectedGraph) KruskalResult$
+    }
+
+    class KruskalResult
+
     class GraphApplicationService {
         -DirectedGraph grafo
         +createGraph(int) void
@@ -95,6 +102,7 @@ classDiagram
         +executeDFS(int) List~Integer~
         +executeDijkstra(int) double[]
         +executeWarshall() boolean[][]
+        +executeKruskal() KruskalResult
     }
 
     class GraphConsoleUI
@@ -106,6 +114,8 @@ classDiagram
     GraphAlgorithms --> DirectedGraph
     GraphApplicationService --> DirectedGraph
     GraphApplicationService --> GraphAlgorithms
+    GraphApplicationService --> KruskalAlgorithm
+    KruskalAlgorithm --> KruskalResult
     GraphStorage --> DirectedGraph
     Main --> GraphApplicationService
     Main --> GraphConsoleUI
@@ -166,6 +176,13 @@ Uma futura melhoria pode padronizar essa politica, mas isso alteraria comportame
 - DFS: implementado em `GraphApplicationService`.
 - Dijkstra: implementado em `GraphApplicationService`.
 - Warshall: implementado em `GraphAlgorithms`.
+- Kruskal: implementado em `KruskalAlgorithm` sobre a interpretacao nao direcionada do grafo.
+
+## AGM Com Kruskal
+
+- A AGM e calculada sobre a versao nao direcionada implicita de `DirectedGraph`.
+- Se existirem `u -> v` e `v -> u`, o algoritmo considera a menor das duas como candidata para a aresta nao direcionada `{u, v}`.
+- Se o grafo estiver desconectado nessa interpretacao, o resultado retornado e uma floresta geradora minima parcial.
 
 ## Verificacao Atual
 

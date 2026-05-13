@@ -143,8 +143,116 @@ public class GraphApplicationService {
         return distances;
     }
 
+    public ShortestPathResult executeShortestPath(int sourceVertex, int destinationVertex) {
+        if (sourceVertex < 0 || sourceVertex >= grafo.getNumVertices()) {
+            throw new IllegalArgumentException("Invalid source vertex: " + sourceVertex);
+        }
+        if (destinationVertex < 0 || destinationVertex >= grafo.getNumVertices()) {
+            throw new IllegalArgumentException("Invalid destination vertex: " + destinationVertex);
+        }
+
+        int n = grafo.getNumVertices();
+        double[] distances = new double[n];
+        int[] previous = new int[n];
+        boolean[] visited = new boolean[n];
+
+        Arrays.fill(distances, Double.POSITIVE_INFINITY);
+        Arrays.fill(previous, -1);
+        distances[sourceVertex] = 0.0;
+
+        PriorityQueue<PriorityPair> pq = new PriorityQueue<>();
+        pq.add(new PriorityPair(0, sourceVertex));
+
+        while (!pq.isEmpty()) {
+            PriorityPair current = pq.poll();
+            int u = current.vertex;
+
+            if (visited[u]) continue;
+            visited[u] = true;
+
+            if (u == destinationVertex) {
+                break;
+            }
+
+            for (Edge edge : grafo.getAdjacencies(u)) {
+                int v = edge.getDestination();
+                double candidate = distances[u] + edge.getWeight();
+                if (candidate < distances[v]) {
+                    distances[v] = candidate;
+                    previous[v] = u;
+                    pq.add(new PriorityPair(candidate, v));
+                }
+            }
+        }
+
+        boolean reachable = distances[destinationVertex] != Double.POSITIVE_INFINITY;
+        List<Integer> path = new ArrayList<>();
+        if (reachable) {
+            for (int vertex = destinationVertex; vertex != -1; vertex = previous[vertex]) {
+                path.add(vertex);
+            }
+            Collections.reverse(path);
+        }
+
+        return new ShortestPathResult(sourceVertex, destinationVertex, distances[destinationVertex], path, reachable);
+    }
+
+    public int findVertexByName(String query) {
+        String normalizedQuery = normalize(query);
+        for (int i = 0; i < grafo.getNumVertices(); i++) {
+            String information = grafo.getInformation(i);
+            if (normalize(information).equals(normalizedQuery)) {
+                return i;
+            }
+        }
+
+        for (int i = 0; i < grafo.getNumVertices(); i++) {
+            String information = grafo.getInformation(i);
+            if (normalize(information).contains(normalizedQuery)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public List<String> listVertexNames() {
+        List<String> names = new ArrayList<>();
+        for (int i = 0; i < grafo.getNumVertices(); i++) {
+            String information = grafo.getInformation(i);
+            if (information != null && !information.isEmpty() && !information.equals("V" + i)) {
+                names.add(information);
+            } else {
+                names.add("V" + i);
+            }
+        }
+        return names;
+    }
+
+    public List<String> findVertexNameSuggestions(String query) {
+        String normalizedQuery = normalize(query);
+        List<String> suggestions = new ArrayList<>();
+
+        for (String name : listVertexNames()) {
+            String normalizedName = normalize(name);
+            if (normalizedName.contains(normalizedQuery) || normalizedQuery.contains(normalizedName)) {
+                suggestions.add(name);
+            }
+        }
+
+        return suggestions;
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+
     public boolean[][] executeWarshall() {
         return GraphAlgorithms.warshall(grafo);
+    }
+
+    public KruskalResult executeKruskal() {
+        return KruskalAlgorithm.computeMinimumSpanningTree(grafo);
     }
 
     public void saveGraph(String filename) {

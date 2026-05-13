@@ -20,6 +20,7 @@
 3. A excecao de idioma deste projeto permite documentacao em portugues.
 4. A normalizacao atual e documental; nao deve renomear classes nem alterar logica.
 5. `output/` nao deve ser limpo sem confirmacao, pois pode conter artefatos gerados ou antigos.
+6. AGM por Kruskal deve respeitar baixo acoplamento e responsabilidade unica.
 
 ## Rejected Decisions
 
@@ -62,3 +63,10 @@ O diagnostico de 2026-05-07 encontrou documentacao stale com nomes antigos como 
 - Registrada excecao de idioma nas regras de agente.
 - Atualizados documentos principais para refletir nomes e responsabilidades reais.
 - Sem alteracao de comportamento Java.
+
+### 2026-05-13 - Kruskal
+
+- Implementado `KruskalAlgorithm` separado de `GraphAlgorithms` para manter responsabilidade focada.
+- Exposto `executeKruskal` em `GraphApplicationService`.
+- Adicionada opcao de menu para AGM.
+- A AGM usa a interpretacao nao direcionada do `DirectedGraph`.

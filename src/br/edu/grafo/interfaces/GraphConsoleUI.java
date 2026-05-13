@@ -2,6 +2,8 @@ package br.edu.grafo.interfaces;
 
 import br.edu.grafo.model.*;
 import br.edu.grafo.util.*;
+import br.edu.grafo.algorithm.*;
+import br.edu.grafo.application.*;
 import java.util.*;
 
 /**
@@ -54,16 +56,20 @@ public class GraphConsoleUI {
     public String displayMenuAndGetChoice() {
         System.out.println("\n=== MAIN MENU ===");
         System.out.println("1. Add edge");
-        System.out.println("2. Remove edge");
-        System.out.println("3. Show adjacency matrix");
-        System.out.println("4. Show adjacency list");
-        System.out.println("5. Breadth-First Search (BFS)");
-        System.out.println("6. Depth-First Search (DFS)");
-        System.out.println("7. Dijkstra - Shortest Path");
-        System.out.println("8. Warshall - Reachability Matrix");
+        System.out.println("2. Create new graph");
+        System.out.println("3. Load Curitiba walk graph");
+        System.out.println("4. Load graph from .bin");
+        System.out.println("5. Remove edge");
+        System.out.println("6. Save graph to .bin");
+        System.out.println("7. Show adjacency list");
+        System.out.println("8. Show adjacency matrix");
         System.out.println("9. Show graph info");
-        System.out.println("10. Save graph to .bin");
-        System.out.println("11. Load graph from .bin");
+        System.out.println("10. Show vertex names");
+        System.out.println("11. Breadth-First Search (BFS)");
+        System.out.println("12. Depth-First Search (DFS)");
+        System.out.println("13. Dijkstra - Shortest Path");
+        System.out.println("14. Kruskal - Minimum Spanning Tree");
+        System.out.println("15. Warshall - Reachability Matrix");
         System.out.println("0. Exit");
         System.out.print("\nChoose an option: ");
 
@@ -109,9 +115,32 @@ public class GraphConsoleUI {
         System.out.println("✓ Edge added successfully!");
     }
 
-    public void displayRemoveEdgePrompt(int maxVertex) {
+    public boolean askContinueAddingEdges() {
+        System.out.print("Add another edge? (Y/N): ");
+        String response = scanner.nextLine().trim().toUpperCase();
+        return response.equals("Y") || response.equals("YES");
+    }
+
+    public void displayRemoveEdgePrompt() {
         System.out.println("\n=== REMOVE EDGE ===");
-        System.out.print("Source vertex (0-" + (maxVertex - 1) + "): ");
+        System.out.print("Choose the edge number to remove: ");
+    }
+
+    public void displayNoEdgesToRemove() {
+        System.out.println("There are no edges to remove.");
+    }
+
+    public void displayExistingEdges(DirectedGraph graph, List<EdgeDisplayItem> edges) {
+        System.out.println("\n=== EXISTING EDGES ===");
+        for (int i = 0; i < edges.size(); i++) {
+            EdgeDisplayItem item = edges.get(i);
+            String originName = formatVertexLabel(graph, item.origin);
+            String destinationName = formatVertexLabel(graph, item.destination);
+            String labelSuffix = item.label.isEmpty() ? "" : " [" + item.label + "]";
+            String connector = item.bidirectional ? " -- " : " -> ";
+            System.out.printf("%d. %s%s%s | weight=%.2f%s%n",
+                    i + 1, originName, connector, destinationName, item.weight, labelSuffix);
+        }
     }
 
     public int askVertexIndex() {
@@ -198,6 +227,11 @@ public class GraphConsoleUI {
         return askAlgorithmSourceVertex("DIJKSTRA - SHORTEST PATH", maxVertex);
     }
 
+    public String askVertexName(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine().trim();
+    }
+
     private int askAlgorithmSourceVertex(String algorithm, int maxVertex) {
         System.out.println("\n=== " + algorithm + " ===");
         System.out.print("Source vertex (0-" + (maxVertex - 1) + "): ");
@@ -218,6 +252,33 @@ public class GraphConsoleUI {
                 System.out.println("  V" + i + ": " + distances[i]);
             }
         }
+        System.out.println();
+    }
+
+    public void displayShortestPathResult(DirectedGraph graph, ShortestPathResult result) {
+        System.out.println("\n=== SHORTEST PATH ===\n");
+        String sourceLabel = formatVertexLabel(graph, result.getSource());
+        String destinationLabel = formatVertexLabel(graph, result.getDestination());
+
+        if (!result.isReachable()) {
+            System.out.println("No path found between " + sourceLabel + " and " + destinationLabel + ".");
+            System.out.println();
+            return;
+        }
+
+        System.out.println("Source: " + sourceLabel);
+        System.out.println("Destination: " + destinationLabel);
+        System.out.printf("Total distance: %.2f km%n", result.getTotalDistance());
+
+        StringBuilder pathBuilder = new StringBuilder();
+        for (int vertex : result.getPath()) {
+            if (pathBuilder.length() > 0) {
+                pathBuilder.append(" -> ");
+            }
+            pathBuilder.append(formatVertexLabel(graph, vertex));
+        }
+
+        System.out.println("Path: " + pathBuilder);
         System.out.println();
     }
 
@@ -269,6 +330,31 @@ public class GraphConsoleUI {
         System.out.println();
     }
 
+    public void displayKruskalResult(KruskalResult result) {
+        System.out.println("\n=== KRUSKAL - MINIMUM SPANNING TREE ===\n");
+        System.out.println("Interpretation: directed graph treated as undirected.");
+
+        if (result.getEdges().isEmpty()) {
+            System.out.println("No edges were selected.");
+        } else {
+            System.out.println("Selected edges:");
+            int index = 1;
+            for (KruskalResult.MinimumEdge edge : result.getEdges()) {
+                String labelSuffix = edge.getLabel().isEmpty() ? "" : " [" + edge.getLabel() + "]";
+                System.out.printf("  %d. V%d -- V%d | weight=%.2f%s%n",
+                        index++, edge.getVertexA(), edge.getVertexB(), edge.getWeight(), labelSuffix);
+            }
+        }
+
+        System.out.printf("%nTotal weight: %.2f%n", result.getTotalWeight());
+        if (result.isSpanningTree()) {
+            System.out.println("Status: minimum spanning tree found.");
+        } else {
+            System.out.println("Status: graph is disconnected in the undirected interpretation; partial forest returned.");
+        }
+        System.out.println();
+    }
+
     public void displayGraphInfo(DirectedGraph grafo) {
         System.out.println("\n=== GRAPH INFORMATION ===\n");
 
@@ -281,6 +367,7 @@ public class GraphConsoleUI {
 
         System.out.println("Vertices: " + numVertices);
         System.out.println("Edges: " + numEdges);
+        System.out.println("Unique connections (ignoring direction): " + countUniqueConnections(grafo));
         System.out.printf("Density: %.2f%%%n", (100.0 * numEdges) / (numVertices * (numVertices - 1)));
 
         System.out.println("\nOut-degrees:");
@@ -340,17 +427,82 @@ public class GraphConsoleUI {
         System.out.println("Graph loaded successfully!");
     }
 
+    public void displayCuritibaGraphLoadedSuccessfully() {
+        System.out.println("Curitiba walk graph loaded successfully!");
+    }
+
     public void displayInvalidInput() {
         System.out.println("Invalid input.");
+    }
+
+    public void displayVertexNames(List<String> names) {
+        System.out.println("\n=== VERTEX NAMES ===\n");
+        for (int i = 0; i < names.size(); i++) {
+            System.out.println((i + 1) + ". " + names.get(i));
+        }
+        System.out.println();
+    }
+
+    public void displayVertexNameSuggestions(String query, List<String> suggestions) {
+        System.out.println("No exact match found for: " + query);
+        if (suggestions.isEmpty()) {
+            System.out.println("No similar vertex names found.");
+        } else {
+            System.out.println("Similar names:");
+            for (String suggestion : suggestions) {
+                System.out.println("  - " + suggestion);
+            }
+        }
+    }
+
+    public void displayGraphRequired() {
+        System.out.println("No graph is currently loaded. Create or load a graph first.");
     }
 
     public void close() {
         scanner.close();
     }
 
+    private String formatVertexLabel(DirectedGraph graph, int vertex) {
+        String information = graph.getInformation(vertex);
+        if (information != null && !information.isEmpty()) {
+            return "V" + vertex + " (" + information + ")";
+        }
+        return "V" + vertex;
+    }
+
+    private int countUniqueConnections(DirectedGraph graph) {
+        Set<String> connections = new HashSet<>();
+        for (int origin = 0; origin < graph.getNumVertices(); origin++) {
+            for (Edge edge : graph.getAdjacencies(origin)) {
+                int destination = edge.getDestination();
+                int vertexA = Math.min(origin, destination);
+                int vertexB = Math.max(origin, destination);
+                connections.add(vertexA + ":" + vertexB);
+            }
+        }
+        return connections.size();
+    }
+
     /**
      * Value object for edge input.
      */
+    public static class EdgeDisplayItem {
+        public final int origin;
+        public final int destination;
+        public final double weight;
+        public final String label;
+        public final boolean bidirectional;
+
+        public EdgeDisplayItem(int origin, int destination, double weight, String label, boolean bidirectional) {
+            this.origin = origin;
+            this.destination = destination;
+            this.weight = weight;
+            this.label = label;
+            this.bidirectional = bidirectional;
+        }
+    }
+
     public static class EdgeInput {
         public final int origin;
         public final int destination;
