@@ -27,9 +27,8 @@ import java.io.Serializable;
  * }</pre>
  *
  * <h2>Notas Implementação</h2>
- * A igualdade entre arestas é baseada apenas no destino, permitindo que
- * múltiplas arestas com mesmo destino sejam tratadas como iguais em estruturas
- * de dados como HashSet.
+ * Esta classe usa a igualdade padrão de identidade de objeto ({@code Object.equals}).
+ * Duas instâncias de {@code Edge} com o mesmo destino são objetos distintos.
  *
  * @author Jafte Carneiro Fagundes da Silva
  * @version 2.0

@@ -50,6 +50,7 @@ Contratos atuais:
 | `br.edu.grafo.application` | `GraphApplicationService`, com casos de uso, BFS, DFS e Dijkstra. |
 | `br.edu.grafo.interfaces` | `GraphConsoleUI`, com entrada e saida de console. |
 | `br.edu.grafo.util` | `GraphStorage`, com serializacao Java em `.bin`. |
+| `br.edu.grafo.gui` | Shell Swing para execucao grafica do projeto. |
 | `br.edu.grafo.app` | `Main` e `ExampleGraph`. |
 
 ## Diagrama De Classes
@@ -143,6 +144,12 @@ User -> Main/ExampleGraph -> GraphApplicationService ou GraphAlgorithms -> Direc
 User -> GraphConsoleUI -> GraphApplicationService -> GraphStorage -> data/*.bin
 ```
 
+### GUI
+
+```text
+User -> GraphMainWindow -> GraphGuiController -> GraphApplicationService -> DirectedGraph
+```
+
 ## Tratamento De Erros
 
 O contrato real e misto:
@@ -177,6 +184,13 @@ Uma futura melhoria pode padronizar essa politica, mas isso alteraria comportame
 - Dijkstra: implementado em `GraphApplicationService`.
 - Warshall: implementado em `GraphAlgorithms`.
 - Kruskal: implementado em `KruskalAlgorithm` sobre a interpretacao nao direcionada do grafo.
+
+## Interface Grafica
+
+- `GraphDesktopApp` e o entrypoint grafico.
+- `GraphMainWindow` organiza topbar, sidebar, status bar e cards centrais.
+- `GraphGuiController` isola a view dos detalhes do servico de aplicacao.
+- Os paineis atuais cobrem overview, carga/salvamento, edicao, menor caminho e algoritmos.
 
 ## AGM Com Kruskal
 

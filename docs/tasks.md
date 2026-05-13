@@ -9,6 +9,7 @@
 
 - [ ] Adicionar testes automatizados para `DirectedGraph`, `GraphAlgorithms` e `GraphApplicationService`.
 - [ ] Adicionar testes automatizados para `KruskalAlgorithm`.
+- [ ] Adicionar testes automatizados para a camada GUI.
 - [ ] Padronizar politica de erro entre modelo, servico e persistencia.
 - [ ] Avaliar limpeza de artefatos antigos em `output/` com confirmacao do usuario.
 - [ ] Considerar Maven ou Gradle somente se o usuario aprovar mudanca de estrutura.
@@ -42,6 +43,7 @@
 - [x] Persistencia em `.bin` com `GraphStorage`.
 - [x] Menu interativo com save/load.
 - [x] AGM por Kruskal na interpretacao nao direcionada do grafo.
+- [x] Shell Swing inicial reutilizando o Design System do EnronAnalyzer.
 
 ## Verification Checklist
 

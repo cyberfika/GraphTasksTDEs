@@ -26,6 +26,14 @@ public class GraphConsoleUI {
         System.out.println("=== DIRECTED GRAPH SYSTEM ===\n");
     }
 
+    public String askExecutionMode() {
+        System.out.println("Choose execution mode:");
+        System.out.println("1. Console");
+        System.out.println("2. GUI");
+        System.out.print("\nChoose an option: ");
+        return scanner.nextLine().trim();
+    }
+
     public void displayGoodbye() {
         System.out.println("\n=== Thank you for using the system! ===");
     }
@@ -58,18 +66,20 @@ public class GraphConsoleUI {
         System.out.println("1. Add edge");
         System.out.println("2. Create new graph");
         System.out.println("3. Load Curitiba walk graph");
-        System.out.println("4. Load graph from .bin");
-        System.out.println("5. Remove edge");
-        System.out.println("6. Save graph to .bin");
-        System.out.println("7. Show adjacency list");
-        System.out.println("8. Show adjacency matrix");
-        System.out.println("9. Show graph info");
-        System.out.println("10. Show vertex names");
-        System.out.println("11. Breadth-First Search (BFS)");
-        System.out.println("12. Depth-First Search (DFS)");
-        System.out.println("13. Dijkstra - Shortest Path");
-        System.out.println("14. Kruskal - Minimum Spanning Tree");
-        System.out.println("15. Warshall - Reachability Matrix");
+        System.out.println("4. Load Solar System graph");
+        System.out.println("5. Load Solar Hyperspace graph");
+        System.out.println("6. Load graph from .bin");
+        System.out.println("7. Remove edge");
+        System.out.println("8. Save graph to .bin");
+        System.out.println("9. Show adjacency list");
+        System.out.println("10. Show adjacency matrix");
+        System.out.println("11. Show graph info");
+        System.out.println("12. Show vertex names");
+        System.out.println("13. Breadth-First Search (BFS)");
+        System.out.println("14. Depth-First Search (DFS)");
+        System.out.println("15. Dijkstra - Shortest Path");
+        System.out.println("16. Kruskal - Minimum Spanning Tree");
+        System.out.println("17. Warshall - Reachability Matrix");
         System.out.println("0. Exit");
         System.out.print("\nChoose an option: ");
 
@@ -368,7 +378,11 @@ public class GraphConsoleUI {
         System.out.println("Vertices: " + numVertices);
         System.out.println("Edges: " + numEdges);
         System.out.println("Unique connections (ignoring direction): " + countUniqueConnections(grafo));
-        System.out.printf("Density: %.2f%%%n", (100.0 * numEdges) / (numVertices * (numVertices - 1)));
+        if (numVertices <= 1) {
+            System.out.println("Density: N/A (requires at least 2 vertices)");
+        } else {
+            System.out.printf("Density: %.2f%%%n", (100.0 * numEdges) / (numVertices * (numVertices - 1)));
+        }
 
         System.out.println("\nOut-degrees:");
         for (int i = 0; i < numVertices; i++) {
@@ -429,6 +443,14 @@ public class GraphConsoleUI {
 
     public void displayCuritibaGraphLoadedSuccessfully() {
         System.out.println("Curitiba walk graph loaded successfully!");
+    }
+
+    public void displaySolarSystemGraphLoadedSuccessfully() {
+        System.out.println("Solar system graph loaded successfully!");
+    }
+
+    public void displaySolarSystemHyperspaceGraphLoadedSuccessfully() {
+        System.out.println("Solar system hyperspace graph loaded successfully!");
     }
 
     public void displayInvalidInput() {

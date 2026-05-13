@@ -21,6 +21,7 @@
 4. A normalizacao atual e documental; nao deve renomear classes nem alterar logica.
 5. `output/` nao deve ser limpo sem confirmacao, pois pode conter artefatos gerados ou antigos.
 6. AGM por Kruskal deve respeitar baixo acoplamento e responsabilidade unica.
+7. A GUI do projeto deve preservar o Design System e o estilo visual do EnronAnalyzer.
 
 ## Rejected Decisions
 
@@ -70,3 +71,24 @@ O diagnostico de 2026-05-07 encontrou documentacao stale com nomes antigos como 
 - Exposto `executeKruskal` em `GraphApplicationService`.
 - Adicionada opcao de menu para AGM.
 - A AGM usa a interpretacao nao direcionada do `DirectedGraph`.
+
+### 2026-05-13 - GUI
+
+- Plano de refatoracao salvo em `docs/gui_refactor_plan.md`.
+- Branch de trabalho para GUI: `teste/GUI`.
+- Criado shell Swing inicial em `src/br/edu/grafo/gui`.
+- Mantido `Main` textual como fallback operacional.
+
+### 2026-05-13 - Expansao De GUI E Grafos Tematicos
+
+- Tema da GUI consolidado em modo unico escuro e monocromatico.
+- Dropdowns ajustados para fundo branco, texto preto e selecao preto/branco.
+- Sidebar passou a listar todos os vertices do grafo atual.
+- Aba `Load/Save` passou a carregar Curitiba, Solar System e Solar Hyperspace.
+- `Main` passou a permitir escolha inicial entre Console e GUI.
+- `SolarSystemGraphFactory` foi separado em:
+  - `createScientificGraph()`
+  - `createHyperspaceGraph()`
+- A explicacao do comportamento do Warshall no sistema solar foi documentada.
+- A unidade de peso na GUI foi alinhada com o grafo carregado.
+- O usuario fara uma revisao posterior de qualidade e depuracao do codigo.

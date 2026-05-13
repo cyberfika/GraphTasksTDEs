@@ -27,10 +27,21 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         GraphConsoleUI ui = new GraphConsoleUI();
-        GraphApplicationService service = new GraphApplicationService();
 
         try {
             ui.displayWelcome();
+
+            String executionMode = ui.askExecutionMode();
+            if ("2".equals(executionMode)) {
+                GraphDesktopApp.main(args);
+                return;
+            }
+            if (!"1".equals(executionMode)) {
+                ui.displayInvalidOption();
+                return;
+            }
+
+            GraphApplicationService service = new GraphApplicationService();
 
             boolean continueRunning = true;
             while (continueRunning) {
@@ -80,49 +91,55 @@ public class Main {
                 handleLoadCuritibaWalkGraph(ui, service);
                 break;
             case "4":
-                handleLoadGraph(ui, service);
+                handleLoadSolarSystemGraph(ui, service);
                 break;
             case "5":
-                if (!ensureGraphLoaded(ui, service)) break;
-                handleRemoveEdge(ui, service);
+                handleLoadSolarSystemHyperspaceGraph(ui, service);
                 break;
             case "6":
-                if (!ensureGraphLoaded(ui, service)) break;
-                handleSaveGraph(ui, service);
+                handleLoadGraph(ui, service);
                 break;
             case "7":
                 if (!ensureGraphLoaded(ui, service)) break;
-                ui.displayAdjacencyList(service.getGraph());
+                handleRemoveEdge(ui, service);
                 break;
             case "8":
                 if (!ensureGraphLoaded(ui, service)) break;
-                ui.displayAdjacencyMatrix(service.getGraph());
+                handleSaveGraph(ui, service);
                 break;
             case "9":
                 if (!ensureGraphLoaded(ui, service)) break;
-                ui.displayGraphInfo(service.getGraph());
+                ui.displayAdjacencyList(service.getGraph());
                 break;
             case "10":
                 if (!ensureGraphLoaded(ui, service)) break;
-                handleListVertexNames(ui, service);
+                ui.displayAdjacencyMatrix(service.getGraph());
                 break;
             case "11":
                 if (!ensureGraphLoaded(ui, service)) break;
-                handleBFS(ui, service);
+                ui.displayGraphInfo(service.getGraph());
                 break;
             case "12":
                 if (!ensureGraphLoaded(ui, service)) break;
-                handleDFS(ui, service);
+                handleListVertexNames(ui, service);
                 break;
             case "13":
                 if (!ensureGraphLoaded(ui, service)) break;
-                handleDijkstra(ui, service);
+                handleBFS(ui, service);
                 break;
             case "14":
                 if (!ensureGraphLoaded(ui, service)) break;
-                handleKruskal(ui, service);
+                handleDFS(ui, service);
                 break;
             case "15":
+                if (!ensureGraphLoaded(ui, service)) break;
+                handleDijkstra(ui, service);
+                break;
+            case "16":
+                if (!ensureGraphLoaded(ui, service)) break;
+                handleKruskal(ui, service);
+                break;
+            case "17":
                 if (!ensureGraphLoaded(ui, service)) break;
                 handleWarshall(ui, service);
                 break;
@@ -261,6 +278,18 @@ public class Main {
         DirectedGraph curitibaGraph = CuritibaWalkGraphFactory.createGraph();
         service.setGraph(curitibaGraph);
         ui.displayCuritibaGraphLoadedSuccessfully();
+    }
+
+    private static void handleLoadSolarSystemGraph(GraphConsoleUI ui, GraphApplicationService service) {
+        DirectedGraph solarSystemGraph = SolarSystemGraphFactory.createScientificGraph();
+        service.setGraph(solarSystemGraph);
+        ui.displaySolarSystemGraphLoadedSuccessfully();
+    }
+
+    private static void handleLoadSolarSystemHyperspaceGraph(GraphConsoleUI ui, GraphApplicationService service) {
+        DirectedGraph solarSystemHyperspaceGraph = SolarSystemGraphFactory.createHyperspaceGraph();
+        service.setGraph(solarSystemHyperspaceGraph);
+        ui.displaySolarSystemHyperspaceGraphLoadedSuccessfully();
     }
 
     private static void handleNamedShortestPath(GraphConsoleUI ui, GraphApplicationService service) {
