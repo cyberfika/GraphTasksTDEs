@@ -1,30 +1,37 @@
 package br.edu.grafo.app;
 
-import br.edu.grafo.application.*;
-import br.edu.grafo.interfaces.*;
-import br.edu.grafo.model.*;
-import br.edu.grafo.algorithm.*;
-import br.edu.grafo.util.*;
-import java.util.*;
+import br.edu.grafo.application.EdgeDisplayItem;
+import br.edu.grafo.application.GraphApplicationService;
+import br.edu.grafo.application.GraphService;
+import br.edu.grafo.application.ShortestPathResult;
+import br.edu.grafo.interfaces.GraphConsoleUI;
+import br.edu.grafo.model.DirectedGraph;
+import br.edu.grafo.model.Edge;
+import br.edu.grafo.util.CuritibaWalkGraphFactory;
+import br.edu.grafo.util.SolarSystemGraphFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 /**
- * Ponto de entrada para o sistema de grafos direcionados.
+ * Ponto de entrada para o sistema de grafos.
  *
- * <h2>Descricao</h2>
- * Inicializa a aplicacao e delega para as camadas de UI e servico.
- * Esta classe tem responsabilidade minima: inicializacao e loop principal.
- *
- * <h2>Como Executar</h2>
- * <pre>{@code
- * java -cp output br.edu.grafo.app.Main
- * }</pre>
+ * <p>Inicializa a aplicacao, delega modo de execucao (console ou GUI) e
+ * mantém o loop principal do menu. Responsabilidade minima: inicializacao
+ * e dispatch de opcoes de menu.</p>
  *
  * @author Jafte Carneiro Fagundes da Silva
- * @version 2.0
- * @see GraphApplicationService
+ * @version 3.0
+ * @see GraphService
  * @see GraphConsoleUI
  */
 public class Main {
+
     public static void main(String[] args) {
         GraphConsoleUI ui = new GraphConsoleUI();
 
@@ -41,7 +48,7 @@ public class Main {
                 return;
             }
 
-            GraphApplicationService service = new GraphApplicationService();
+            GraphService service = new GraphApplicationService();
 
             boolean continueRunning = true;
             while (continueRunning) {
@@ -54,29 +61,14 @@ public class Main {
 
             ui.displayGoodbye();
         } catch (Exception e) {
-            System.err.println("Erro fatal: " + e.getMessage());
+            System.err.println("Fatal error: " + e.getMessage());
             e.printStackTrace();
         } finally {
             ui.close();
         }
     }
 
-    /**
-     * Cria novo grafo com numero de vertices especificado pelo usuario.
-     */
-    private static void createNewGraph(GraphConsoleUI ui, GraphApplicationService service) {
-        int numVertices = ui.askNumVertices();
-        if (numVertices > 0) {
-            service.createGraph(numVertices);
-        }
-    }
-
-    /**
-     * Processa selecao de menu e dispatch para handler apropriado.
-     *
-     * @return true se usuario quer continuar, false se sair foi selecionado
-     */
-    private static boolean handleMenuOption(GraphConsoleUI ui, GraphApplicationService service) {
+    private static boolean handleMenuOption(GraphConsoleUI ui, GraphService service) {
         String choice = ui.displayMenuAndGetChoice();
 
         switch (choice) {
@@ -88,13 +80,16 @@ public class Main {
                 createNewGraph(ui, service);
                 break;
             case "3":
-                handleLoadCuritibaWalkGraph(ui, service);
+                service.setGraph(CuritibaWalkGraphFactory.createGraph());
+                ui.displayCuritibaGraphLoadedSuccessfully();
                 break;
             case "4":
-                handleLoadSolarSystemGraph(ui, service);
+                service.setGraph(SolarSystemGraphFactory.createScientificGraph());
+                ui.displaySolarSystemGraphLoadedSuccessfully();
                 break;
             case "5":
-                handleLoadSolarSystemHyperspaceGraph(ui, service);
+                service.setGraph(SolarSystemGraphFactory.createHyperspaceGraph());
+                ui.displaySolarSystemHyperspaceGraphLoadedSuccessfully();
                 break;
             case "6":
                 handleLoadGraph(ui, service);
@@ -121,7 +116,7 @@ public class Main {
                 break;
             case "12":
                 if (!ensureGraphLoaded(ui, service)) break;
-                handleListVertexNames(ui, service);
+                ui.displayVertexNames(service.listVertexNames());
                 break;
             case "13":
                 if (!ensureGraphLoaded(ui, service)) break;
@@ -152,7 +147,7 @@ public class Main {
         return true;
     }
 
-    private static boolean ensureGraphLoaded(GraphConsoleUI ui, GraphApplicationService service) {
+    private static boolean ensureGraphLoaded(GraphConsoleUI ui, GraphService service) {
         if (!service.hasGraph()) {
             ui.displayGraphRequired();
             return false;
@@ -160,95 +155,98 @@ public class Main {
         return true;
     }
 
-    private static void handleAddEdge(GraphConsoleUI ui, GraphApplicationService service) {
+    private static void createNewGraph(GraphConsoleUI ui, GraphService service) {
+        int numVertices = ui.askNumVertices();
+        if (numVertices > 0) {
+            service.createGraph(numVertices);
+        }
+    }
+
+    private static void handleAddEdge(GraphConsoleUI ui, GraphService service) {
         boolean continueAdding = true;
         while (continueAdding) {
             GraphConsoleUI.EdgeInput input = ui.askEdgeInput(service.getGraph().getNumVertices());
             if (input != null) {
-                boolean edgeExistedBefore = service.getGraph().hasEdge(input.origin, input.destination);
-                service.addEdge(input.origin, input.destination, input.weight, input.label);
-                boolean edgeExistsAfter = service.getGraph().hasEdge(input.origin, input.destination);
-                if (!edgeExistedBefore && edgeExistsAfter) {
+                boolean created = service.addEdge(input.origin, input.destination, input.weight, input.label);
+                if (created) {
                     ui.displayEdgeAdded();
+                } else {
+                    ui.displayEdgeDuplicate();
                 }
             }
-
             continueAdding = ui.askContinueAddingEdges();
         }
     }
 
-    private static void handleRemoveEdge(GraphConsoleUI ui, GraphApplicationService service) {
-        List<EdgeReference> edges = listExistingEdges(service.getGraph());
+    private static void handleRemoveEdge(GraphConsoleUI ui, GraphService service) {
+        List<EdgeDisplayItem> edges = listEdgesForDisplay(service.getGraph());
         if (edges.isEmpty()) {
             ui.displayNoEdgesToRemove();
             return;
         }
 
-        ui.displayExistingEdges(service.getGraph(), toDisplayItems(edges));
-
+        ui.displayExistingEdges(service.getGraph(), edges);
         ui.displayRemoveEdgePrompt();
         int choice = ui.askVertexIndex();
         int edgeIndex = choice - 1;
 
         if (edgeIndex >= 0 && edgeIndex < edges.size()) {
-            EdgeReference selected = edges.get(edgeIndex);
-            service.removeEdge(selected.origin, selected.edge.getDestination());
+            EdgeDisplayItem selected = edges.get(edgeIndex);
+            service.removeEdge(selected.origin, selected.destination);
             if (selected.bidirectional) {
-                service.removeEdge(selected.edge.getDestination(), selected.origin);
+                service.removeEdge(selected.destination, selected.origin);
             }
         } else {
             ui.displayInvalidInput();
         }
     }
 
-    private static void handleBFS(GraphConsoleUI ui, GraphApplicationService service) {
+    private static void handleBFS(GraphConsoleUI ui, GraphService service) {
         int source = ui.askBFSSourceVertex(service.getGraph().getNumVertices());
         if (source >= 0) {
-            List<Integer> visited = service.executeBFS(source);
-            ui.displayBFSResult(visited);
+            ui.displayBFSResult(service.executeBFS(source));
         }
     }
 
-    private static void handleDFS(GraphConsoleUI ui, GraphApplicationService service) {
+    private static void handleDFS(GraphConsoleUI ui, GraphService service) {
         int source = ui.askDFSSourceVertex(service.getGraph().getNumVertices());
         if (source >= 0) {
-            List<Integer> visited = service.executeDFS(source);
-            ui.displayDFSResult(visited);
+            ui.displayDFSResult(service.executeDFS(source));
         }
     }
 
-    private static void handleDijkstra(GraphConsoleUI ui, GraphApplicationService service) {
+    private static void handleDijkstra(GraphConsoleUI ui, GraphService service) {
         if (hasNamedVertices(service.getGraph())) {
             handleNamedShortestPath(ui, service);
             return;
         }
-
         int source = ui.askDijkstraSourceVertex(service.getGraph().getNumVertices());
         if (source >= 0) {
-            double[] distances = service.executeDijkstra(source);
-            ui.displayDijkstraResult(distances, source);
+            ui.displayDijkstraResult(service.executeDijkstra(source), source);
         }
     }
 
-    private static void handleWarshall(GraphConsoleUI ui, GraphApplicationService service) {
+    private static void handleWarshall(GraphConsoleUI ui, GraphService service) {
         boolean[][] reachability = service.executeWarshall();
         ui.displayWarshallMatrix(reachability);
         ui.displayWarshallStatistics(reachability);
     }
 
-    private static void handleKruskal(GraphConsoleUI ui, GraphApplicationService service) {
-        KruskalResult result = service.executeKruskal();
-        ui.displayKruskalResult(result);
+    private static void handleKruskal(GraphConsoleUI ui, GraphService service) {
+        ui.displayKruskalResult(service.executeKruskal());
     }
 
-    private static void handleSaveGraph(GraphConsoleUI ui, GraphApplicationService service) {
+    private static void handleSaveGraph(GraphConsoleUI ui, GraphService service) {
         String filename = ui.askSaveFilename();
-        service.saveGraph(filename);
-        ui.displayGraphSaveMessage(filename);
+        if (service.saveGraph(filename)) {
+            ui.displayGraphSaveSuccess(filename);
+        } else {
+            ui.displayGraphSaveError(filename);
+        }
     }
 
-    private static void handleLoadGraph(GraphConsoleUI ui, GraphApplicationService service) {
-        String[] savedGraphs = GraphStorage.listGraphs();
+    private static void handleLoadGraph(GraphConsoleUI ui, GraphService service) {
+        String[] savedGraphs = service.listSavedGraphs();
         ui.displayLoadOptions(savedGraphs);
 
         if (savedGraphs.length == 0) {
@@ -259,40 +257,17 @@ public class Main {
         String graphName = resolveGraphName(input, savedGraphs);
 
         if (graphName != null && !graphName.isEmpty()) {
-            if (!GraphStorage.fileExists(graphName)) {
-                ui.displayFileNotFound(graphName);
-                return;
-            }
-
-            DirectedGraph loadedGraph = GraphStorage.loadGraph(graphName);
-            if (loadedGraph != null) {
-                service.setGraph(loadedGraph);
+            if (service.loadGraph(graphName)) {
                 ui.displayGraphLoadedSuccessfully();
+            } else {
+                ui.displayFileNotFound(graphName);
             }
         } else {
             ui.displayInvalidInput();
         }
     }
 
-    private static void handleLoadCuritibaWalkGraph(GraphConsoleUI ui, GraphApplicationService service) {
-        DirectedGraph curitibaGraph = CuritibaWalkGraphFactory.createGraph();
-        service.setGraph(curitibaGraph);
-        ui.displayCuritibaGraphLoadedSuccessfully();
-    }
-
-    private static void handleLoadSolarSystemGraph(GraphConsoleUI ui, GraphApplicationService service) {
-        DirectedGraph solarSystemGraph = SolarSystemGraphFactory.createScientificGraph();
-        service.setGraph(solarSystemGraph);
-        ui.displaySolarSystemGraphLoadedSuccessfully();
-    }
-
-    private static void handleLoadSolarSystemHyperspaceGraph(GraphConsoleUI ui, GraphApplicationService service) {
-        DirectedGraph solarSystemHyperspaceGraph = SolarSystemGraphFactory.createHyperspaceGraph();
-        service.setGraph(solarSystemHyperspaceGraph);
-        ui.displaySolarSystemHyperspaceGraphLoadedSuccessfully();
-    }
-
-    private static void handleNamedShortestPath(GraphConsoleUI ui, GraphApplicationService service) {
+    private static void handleNamedShortestPath(GraphConsoleUI ui, GraphService service) {
         String sourceName = ui.askVertexName("Source name: ");
         String destinationName = ui.askVertexName("Destination name: ");
 
@@ -303,7 +278,6 @@ public class Main {
             ui.displayVertexNameSuggestions(sourceName, service.findVertexNameSuggestions(sourceName));
             return;
         }
-
         if (destination < 0) {
             ui.displayVertexNameSuggestions(destinationName, service.findVertexNameSuggestions(destinationName));
             return;
@@ -313,13 +287,6 @@ public class Main {
         ui.displayShortestPathResult(service.getGraph(), result);
     }
 
-    private static void handleListVertexNames(GraphConsoleUI ui, GraphApplicationService service) {
-        ui.displayVertexNames(service.listVertexNames());
-    }
-
-    /**
-     * Resolve nome do grafo a partir de entrada do usuario (pode ser indice ou nome).
-     */
     private static String resolveGraphName(String input, String[] savedGraphs) {
         try {
             int index = Integer.parseInt(input) - 1;
@@ -332,8 +299,10 @@ public class Main {
         return null;
     }
 
-    private static List<EdgeReference> listExistingEdges(DirectedGraph graph) {
-        List<EdgeReference> edges = new ArrayList<>();
+    // --- Listagem de arestas para remocao ---
+
+    private static List<EdgeDisplayItem> listEdgesForDisplay(DirectedGraph graph) {
+        List<EdgeDisplayItem> items = new ArrayList<>();
         Set<String> processedBidirectional = new HashSet<>();
 
         for (int origin = 0; origin < graph.getNumVertices(); origin++) {
@@ -349,31 +318,15 @@ public class Main {
                     processedBidirectional.add(key);
                 }
 
-                edges.add(new EdgeReference(origin, edge, bidirectional));
+                items.add(new EdgeDisplayItem(origin, destination, edge.getWeight(), edge.getLabel(), bidirectional));
             }
         }
-        return edges;
-    }
-
-    private static List<GraphConsoleUI.EdgeDisplayItem> toDisplayItems(List<EdgeReference> edges) {
-        List<GraphConsoleUI.EdgeDisplayItem> displayItems = new ArrayList<>();
-        for (EdgeReference edgeReference : edges) {
-            displayItems.add(new GraphConsoleUI.EdgeDisplayItem(
-                    edgeReference.origin,
-                    edgeReference.edge.getDestination(),
-                    edgeReference.edge.getWeight(),
-                    edgeReference.edge.getLabel(),
-                    edgeReference.bidirectional
-            ));
-        }
-        return displayItems;
+        return items;
     }
 
     private static boolean isSymmetricConnection(DirectedGraph graph, int origin, Edge edge) {
         Optional<Edge> reverse = graph.getEdge(edge.getDestination(), origin);
-        if (!reverse.isPresent()) {
-            return false;
-        }
+        if (!reverse.isPresent()) return false;
 
         Edge reverseEdge = reverse.get();
         return Double.compare(edge.getWeight(), reverseEdge.getWeight()) == 0
@@ -381,30 +334,18 @@ public class Main {
     }
 
     private static String buildBidirectionalKey(int origin, int destination, Edge edge) {
-        int vertexA = Math.min(origin, destination);
-        int vertexB = Math.max(origin, destination);
-        return vertexA + ":" + vertexB + ":" + edge.getWeight() + ":" + edge.getLabel();
+        int a = Math.min(origin, destination);
+        int b = Math.max(origin, destination);
+        return a + ":" + b + ":" + edge.getWeight() + ":" + edge.getLabel();
     }
 
     private static boolean hasNamedVertices(DirectedGraph graph) {
         for (int i = 0; i < graph.getNumVertices(); i++) {
-            String information = graph.getInformation(i);
-            if (information != null && !information.isEmpty() && !information.equals("V" + i)) {
+            Optional<String> info = graph.getInformation(i);
+            if (info.isPresent() && !info.get().equals("V" + i)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static class EdgeReference {
-        private final int origin;
-        private final Edge edge;
-        private final boolean bidirectional;
-
-        private EdgeReference(int origin, Edge edge, boolean bidirectional) {
-            this.origin = origin;
-            this.edge = edge;
-            this.bidirectional = bidirectional;
-        }
     }
 }

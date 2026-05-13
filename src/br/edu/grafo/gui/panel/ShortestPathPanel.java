@@ -84,10 +84,9 @@ public class ShortestPathPanel extends JPanel {
     }
 
     private String vertexLabel(DirectedGraph graph, int vertex) {
-        String info = graph.getInformation(vertex);
-        if (info != null && !info.isEmpty() && !info.equals("V" + vertex)) {
-            return "V" + vertex + " (" + info + ")";
-        }
-        return "V" + vertex;
+        return graph.getInformation(vertex)
+                .filter(info -> !info.equals("V" + vertex))
+                .map(info -> "V" + vertex + " (" + info + ")")
+                .orElse("V" + vertex);
     }
 }

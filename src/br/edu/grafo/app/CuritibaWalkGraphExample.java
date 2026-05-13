@@ -1,5 +1,6 @@
 package br.edu.grafo.app;
 
+import br.edu.grafo.interfaces.GraphConsoleUI;
 import br.edu.grafo.model.DirectedGraph;
 import br.edu.grafo.util.CuritibaWalkGraphFactory;
 
@@ -16,6 +17,6 @@ public class CuritibaWalkGraphExample {
         System.out.println("Weight unit: kilometers.");
         System.out.println();
 
-        graph.printAdjacencies();
+        new GraphConsoleUI().displayAdjacencyList(graph);
     }
 }

@@ -1,15 +1,47 @@
 package br.edu.grafo.gui;
 
-import br.edu.grafo.application.*;
 import br.edu.grafo.algorithm.KruskalResult;
-import br.edu.grafo.model.*;
-import br.edu.grafo.util.*;
+import br.edu.grafo.application.EdgeDisplayItem;
+import br.edu.grafo.application.GraphApplicationService;
+import br.edu.grafo.application.GraphService;
+import br.edu.grafo.application.GraphType;
+import br.edu.grafo.application.ShortestPathResult;
+import br.edu.grafo.model.DirectedGraph;
+import br.edu.grafo.model.Edge;
+import br.edu.grafo.util.CuritibaWalkGraphFactory;
+import br.edu.grafo.util.SolarSystemGraphFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
+/**
+ * Controlador da GUI de grafos.
+ *
+ * <p>Atua como intermediario entre os paineis Swing e a camada de aplicacao,
+ * seguindo o padrao MVC. Depende de {@link GraphService} (DIP), nao
+ * de {@code GraphApplicationService} diretamente.</p>
+ *
+ * <p>Usa {@link GraphType} para metadados de cada tipo de grafo, eliminando
+ * a cadeia de {@code if} que violava o OCP.</p>
+ *
+ * @author Jafte Carneiro Fagundes da Silva
+ * @version 3.0
+ */
 public class GraphGuiController {
-    private final GraphApplicationService service = new GraphApplicationService();
-    private String currentGraphName = "No graph";
+
+    private final GraphService service;
+    private GraphType currentGraphType = GraphType.NONE;
+    private String currentGraphName = GraphType.NONE.getDefaultDisplayName();
+
+    public GraphGuiController() {
+        this.service = new GraphApplicationService();
+    }
+
+    // --- Acesso ao grafo ---
 
     public boolean hasGraph() {
         return service.hasGraph();
@@ -23,64 +55,64 @@ public class GraphGuiController {
         return currentGraphName;
     }
 
+    /**
+     * Retorna a unidade de peso das arestas para o tipo de grafo atual.
+     * Delega ao enum {@link GraphType}, eliminando cadeia de if (OCP).
+     */
     public String weightUnit() {
-        if ("Curitiba walk graph".equals(currentGraphName)) {
-            return "km";
-        }
-        if ("Solar system graph".equals(currentGraphName)) {
-            return "AU";
-        }
-        if ("Solar system hyperspace graph".equals(currentGraphName)) {
-            return "route cost";
-        }
-        return "units";
+        return currentGraphType.getWeightUnit();
     }
+
+    // --- Criacao / carregamento ---
 
     public void createGraph(int numVertices) {
         service.createGraph(numVertices);
-        currentGraphName = "Manual graph";
+        currentGraphType = GraphType.MANUAL;
+        currentGraphName = GraphType.MANUAL.getDefaultDisplayName();
     }
 
     public void loadCuritibaGraph() {
         service.setGraph(CuritibaWalkGraphFactory.createGraph());
-        currentGraphName = "Curitiba walk graph";
+        currentGraphType = GraphType.CURITIBA_WALK;
+        currentGraphName = GraphType.CURITIBA_WALK.getDefaultDisplayName();
     }
 
     public void loadSolarSystemGraph() {
         service.setGraph(SolarSystemGraphFactory.createScientificGraph());
-        currentGraphName = "Solar system graph";
+        currentGraphType = GraphType.SOLAR_SYSTEM;
+        currentGraphName = GraphType.SOLAR_SYSTEM.getDefaultDisplayName();
     }
 
     public void loadSolarSystemHyperspaceGraph() {
         service.setGraph(SolarSystemGraphFactory.createHyperspaceGraph());
-        currentGraphName = "Solar system hyperspace graph";
+        currentGraphType = GraphType.SOLAR_SYSTEM_HYPERSPACE;
+        currentGraphName = GraphType.SOLAR_SYSTEM_HYPERSPACE.getDefaultDisplayName();
     }
 
     public boolean loadGraph(String name) {
-        DirectedGraph loaded = service.loadGraph(name);
-        if (loaded == null) {
-            return false;
+        boolean success = service.loadGraph(name);
+        if (success) {
+            currentGraphType = GraphType.USER_SAVED;
+            currentGraphName = name;
         }
-        service.setGraph(loaded);
-        currentGraphName = name;
-        return true;
+        return success;
     }
 
     public void saveGraph(String name) {
         service.saveGraph(name);
+        currentGraphType = GraphType.USER_SAVED;
         currentGraphName = name;
     }
 
+    /**
+     * Indica se o grafo atual tem um nome persistivel (foi salvo/carregado pelo usuario).
+     */
     public boolean hasPersistableGraphName() {
-        return hasGraph()
-                && currentGraphName != null
-                && !currentGraphName.isEmpty()
-                && !"No graph".equals(currentGraphName)
-                && !"Manual graph".equals(currentGraphName)
-                && !"Curitiba walk graph".equals(currentGraphName)
-                && !"Solar system graph".equals(currentGraphName)
-                && !"Solar system hyperspace graph".equals(currentGraphName);
+        return hasGraph() && currentGraphType.isUserSaved()
+                && currentGraphName != null && !currentGraphName.isEmpty();
     }
+
+    // --- Edicao de arestas ---
 
     public void addEdge(int origin, int destination, double weight, String label) {
         service.addEdge(origin, destination, weight, label);
@@ -97,6 +129,8 @@ public class GraphGuiController {
         }
     }
 
+    // --- Listagem de arestas ---
+
     public List<EdgeDisplayItem> listEdges() {
         List<EdgeDisplayItem> items = new ArrayList<>();
         Set<String> processedBidirectional = new HashSet<>();
@@ -105,13 +139,14 @@ public class GraphGuiController {
             for (Edge edge : graph().getAdjacencies(origin)) {
                 int destination = edge.getDestination();
                 boolean bidirectional = isSymmetric(origin, edge);
+
                 if (bidirectional) {
-                    String key = Math.min(origin, destination) + ":" + Math.max(origin, destination)
-                            + ":" + edge.getWeight() + ":" + edge.getLabel();
+                    String key = buildBidirectionalKey(origin, destination, edge);
                     if (!processedBidirectional.add(key)) {
                         continue;
                     }
                 }
+
                 items.add(new EdgeDisplayItem(origin, destination, edge.getWeight(), edge.getLabel(), bidirectional));
             }
         }
@@ -125,6 +160,14 @@ public class GraphGuiController {
                 && Objects.equals(reverse.get().getLabel(), edge.getLabel());
     }
 
+    private String buildBidirectionalKey(int origin, int destination, Edge edge) {
+        int a = Math.min(origin, destination);
+        int b = Math.max(origin, destination);
+        return a + ":" + b + ":" + edge.getWeight() + ":" + edge.getLabel();
+    }
+
+    // --- Consulta de vertices ---
+
     public List<String> listVertexNames() {
         return service.listVertexNames();
     }
@@ -136,6 +179,8 @@ public class GraphGuiController {
     public int findVertexByName(String name) {
         return service.findVertexByName(name);
     }
+
+    // --- Algoritmos ---
 
     public List<Integer> bfs(int source) {
         return service.executeBFS(source);
@@ -161,9 +206,13 @@ public class GraphGuiController {
         return service.executeKruskal();
     }
 
+    // --- Persistencia ---
+
     public String[] savedGraphNames() {
-        return GraphStorage.listGraphs();
+        return service.listSavedGraphs();
     }
+
+    // --- Estatisticas do grafo ---
 
     public int vertexCount() {
         return graph().getNumVertices();
@@ -195,35 +244,10 @@ public class GraphGuiController {
     }
 
     public String graphInfoText() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Graph: ").append(currentGraphName()).append('\n');
-        builder.append("Vertices: ").append(vertexCount()).append('\n');
-        builder.append("Edges: ").append(edgeCount()).append('\n');
-        builder.append("Unique connections: ").append(uniqueConnectionCount()).append('\n');
-        builder.append(String.format("Density: %.2f%%%n", densityPercent()));
-        return builder.toString();
-    }
-
-    public static class EdgeDisplayItem {
-        public final int origin;
-        public final int destination;
-        public final double weight;
-        public final String label;
-        public final boolean bidirectional;
-
-        public EdgeDisplayItem(int origin, int destination, double weight, String label, boolean bidirectional) {
-            this.origin = origin;
-            this.destination = destination;
-            this.weight = weight;
-            this.label = label;
-            this.bidirectional = bidirectional;
-        }
-
-        @Override
-        public String toString() {
-            String connector = bidirectional ? " -- " : " -> ";
-            return "V" + origin + connector + "V" + destination + " | weight=" + String.format("%.2f", weight)
-                    + (label == null || label.isEmpty() ? "" : " [" + label + "]");
-        }
+        return "Graph: " + currentGraphName() + '\n'
+                + "Vertices: " + vertexCount() + '\n'
+                + "Edges: " + edgeCount() + '\n'
+                + "Unique connections: " + uniqueConnectionCount() + '\n'
+                + String.format("Density: %.2f%%%n", densityPercent());
     }
 }

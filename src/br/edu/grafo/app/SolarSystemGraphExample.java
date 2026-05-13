@@ -1,5 +1,6 @@
 package br.edu.grafo.app;
 
+import br.edu.grafo.interfaces.GraphConsoleUI;
 import br.edu.grafo.model.DirectedGraph;
 import br.edu.grafo.util.SolarSystemGraphFactory;
 
@@ -16,6 +17,6 @@ public class SolarSystemGraphExample {
         System.out.println("Weight unit: astronomical units (AU).");
         System.out.println();
 
-        graph.printAdjacencies();
+        new GraphConsoleUI().displayAdjacencyList(graph);
     }
 }

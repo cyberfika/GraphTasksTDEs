@@ -3,61 +3,45 @@ package br.edu.grafo.model;
 import java.io.Serializable;
 
 /**
- * Representa uma aresta (edge) direcionada em um grafo.
+ * Representa uma aresta direcionada, ponderada e rotulada.
  *
- * <h2>Descrição</h2>
- * Uma aresta é a conexão entre dois vértices em um grafo direcionado.
- * Cada aresta possui um vértice destino, um peso (custo) e um rótulo opcional.
+ * <h2>Descricao</h2>
+ * Uma aresta e a conexao entre dois vertices em um grafo direcionado.
+ * Cada aresta possui um vertice destino, um peso e um rotulo opcional.
  *
- * <h2>Características</h2>
- * <ul>
- *   <li>Direcionada: de um vértice origem para um vértice destino</li>
- *   <li>Ponderada: possui um peso (double) que representa custo, distância, etc.</li>
- *   <li>Rotulada: pode conter um rótulo opcional (String) para documentação</li>
- *   <li>Serializável: pode ser salva em arquivo binário</li>
- * </ul>
- *
- * <h2>Exemplo de Uso</h2>
- * <pre>{@code
- * // Criar aresta do vértice origem para destino 2 com peso 5.0
- * Edge edge1 = new Edge(2, 5.0);
- *
- * // Criar aresta com rótulo
- * Edge edge2 = new Edge(3, 7.5, "important_edge");
- * }</pre>
- *
- * <h2>Notas Implementação</h2>
- * Esta classe usa a igualdade padrão de identidade de objeto ({@code Object.equals}).
- * Duas instâncias de {@code Edge} com o mesmo destino são objetos distintos.
+ * <h2>Imutabilidade</h2>
+ * Esta classe e imutavel (Effective Java, Item 17): todos os campos sao
+ * {@code final}, nao ha setters, e o estado nao pode ser alterado apos
+ * construcao. Isso garante seguranca em colecoes e elimina efeitos colaterais.
  *
  * @author Jafte Carneiro Fagundes da Silva
- * @version 2.0
+ * @version 3.0
  * @see DirectedGraph
  */
-public class Edge implements Serializable {
+public final class Edge implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private int destination;
-    private double weight;
-    private String label;
+    private final int destination;
+    private final double weight;
+    private final String label;
 
     /**
-     * Constrói uma aresta com destino, peso e rótulo.
+     * Constroi uma aresta com destino, peso e rotulo.
      *
-     * @param destination índice do vértice destino
-     * @param weight      peso da aresta (custo, distância, etc.)
-     * @param label       rótulo descritivo (pode ser vazio)
+     * @param destination indice do vertice destino
+     * @param weight      peso da aresta (custo, distancia, etc.)
+     * @param label       rotulo descritivo (nao pode ser null; use "" se sem rotulo)
      */
     public Edge(int destination, double weight, String label) {
         this.destination = destination;
         this.weight = weight;
-        this.label = label;
+        this.label = (label != null) ? label : "";
     }
 
     /**
-     * Constrói uma aresta com destino e peso (sem rótulo).
+     * Constroi uma aresta com destino e peso (sem rotulo).
      *
-     * @param destination índice do vértice destino
+     * @param destination indice do vertice destino
      * @param weight      peso da aresta
      */
     public Edge(int destination, double weight) {
@@ -65,65 +49,30 @@ public class Edge implements Serializable {
     }
 
     /**
-     * Retorna o vértice destino dessa aresta.
-     *
-     * @return índice do vértice destino
+     * Retorna o vertice destino dessa aresta.
      */
     public int getDestination() {
         return destination;
     }
 
     /**
-     * Define o vértice destino dessa aresta.
-     *
-     * @param destination novo índice do vértice destino
-     */
-    public void setDestination(int destination) {
-        this.destination = destination;
-    }
-
-    /**
      * Retorna o peso dessa aresta.
-     *
-     * @return peso (custo, distância, etc.)
      */
     public double getWeight() {
         return weight;
     }
 
     /**
-     * Define o peso dessa aresta.
-     *
-     * @param weight novo peso da aresta
-     */
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
-    /**
-     * Retorna o rótulo dessa aresta.
-     *
-     * @return rótulo descritivo ou string vazia se não houver rótulo
+     * Retorna o rotulo dessa aresta.
+     * Nunca retorna null; retorna string vazia se sem rotulo.
      */
     public String getLabel() {
         return label;
     }
 
     /**
-     * Define o rótulo dessa aresta.
-     *
-     * @param label novo rótulo descritivo
-     */
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    /**
-     * Retorna representação em string desta aresta.
-     *
-     * Formato: [destino, peso] ou [destino, peso, rótulo] se houver rótulo.
-     *
-     * @return string representando a aresta
+     * Retorna representacao em string desta aresta.
+     * Formato: {@code [destino, peso]} ou {@code [destino, peso, rotulo]}.
      */
     @Override
     public String toString() {

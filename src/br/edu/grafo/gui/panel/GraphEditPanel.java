@@ -1,5 +1,6 @@
 package br.edu.grafo.gui.panel;
 
+import br.edu.grafo.application.EdgeDisplayItem;
 import br.edu.grafo.gui.GraphGuiController;
 import br.edu.grafo.gui.component.SwingHelper;
 import br.edu.grafo.gui.design.DesignSystem;
@@ -13,7 +14,7 @@ public class GraphEditPanel extends JPanel {
     private final GraphGuiController controller;
     private final Runnable afterChange;
     private final JTextArea outputArea;
-    private final DefaultListModel<GraphGuiController.EdgeDisplayItem> edgeModel;
+    private final DefaultListModel<EdgeDisplayItem> edgeModel;
 
     public GraphEditPanel(GraphGuiController controller, Runnable afterChange) {
         this.controller = controller;
@@ -82,7 +83,7 @@ public class GraphEditPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(8, 0));
         panel.setOpaque(false);
 
-        JList<GraphGuiController.EdgeDisplayItem> edgeList = new JList<>(edgeModel);
+        JList<EdgeDisplayItem> edgeList = new JList<>(edgeModel);
         SwingHelper.styleList(edgeList);
         JButton refreshButton = SwingHelper.actionButton("Refresh Edge List");
         JButton removeButton = SwingHelper.actionButton("Remove Selected Edge");
@@ -99,7 +100,7 @@ public class GraphEditPanel extends JPanel {
 
         refreshButton.addActionListener(e -> refreshEdges());
         removeButton.addActionListener(e -> {
-            GraphGuiController.EdgeDisplayItem selected = edgeList.getSelectedValue();
+            EdgeDisplayItem selected = edgeList.getSelectedValue();
             if (selected == null) {
                 outputArea.setText("Select an edge to remove.");
                 return;
@@ -118,8 +119,8 @@ public class GraphEditPanel extends JPanel {
         if (!controller.hasGraph()) {
             return;
         }
-        List<GraphGuiController.EdgeDisplayItem> edges = controller.listEdges();
-        for (GraphGuiController.EdgeDisplayItem edge : edges) {
+        List<EdgeDisplayItem> edges = controller.listEdges();
+        for (EdgeDisplayItem edge : edges) {
             edgeModel.addElement(edge);
         }
     }
