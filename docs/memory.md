@@ -2,7 +2,7 @@
 
 > Status: Active
 > Authority: Tier 3 - Working Document
-> Last Updated: 2026-05-07
+> Last Updated: 2026-05-13
 > Owner: Jafte Carneiro Fagundes da Silva
 
 ## User Preferences
@@ -21,22 +21,23 @@
 4. A normalizacao atual e documental; nao deve renomear classes nem alterar logica.
 5. `output/` nao deve ser limpo sem confirmacao, pois pode conter artefatos gerados ou antigos.
 6. AGM por Kruskal deve respeitar baixo acoplamento e responsabilidade unica.
+7. A GUI do projeto deve preservar o Design System e o estilo visual do EnronAnalyzer.
 
 ## Rejected Decisions
 
-1. Renomear classes Java nesta tarefa.
-2. Alterar APIs publicas nesta tarefa.
-3. Introduzir Maven, Gradle ou JUnit nesta tarefa.
-4. Apagar arquivos `.bin` ou limpar `output/` sem confirmacao.
+1. Introduzir Maven, Gradle ou JUnit sem aprovacao explicita do usuario.
+2. Apagar arquivos `.bin` ou limpar `output/` sem confirmacao.
 
 ## Repository Conventions
 
 - Codigo-fonte fica em `src/br/edu/grafo`.
 - Classes e arquivos Java usam nomes em ingles.
 - Documentacao Markdown pode usar portugues.
-- `GraphApplicationService` contem BFS, DFS e Dijkstra.
-- `GraphAlgorithms` contem Warshall e helpers de impressao.
-- `GraphStorage` usa serializacao Java para arquivos `.bin`.
+- `GraphApplicationService` implementa `GraphService` e contem BFS, DFS, Dijkstra, Warshall, Kruskal.
+- `GraphAlgorithms` contem apenas algoritmos puros (sem I/O).
+- `GraphStorage` implementa `GraphRepository`; usa serializacao Java para `.bin`.
+- `GraphConsoleUI` centraliza todo display de console, incluindo metodos estaticos de matriz booleana.
+- Clientes de alto nivel (`Main`, `GraphGuiController`) dependem de interfaces, nao de implementacoes.
 
 ## Important Context
 
@@ -44,9 +45,9 @@ O diagnostico de 2026-05-07 encontrou documentacao stale com nomes antigos como 
 
 ## Open Questions
 
-1. O projeto deve receber testes automatizados com JUnit?
-2. A politica de erro deve ser padronizada para excecoes ou mensagens de console?
-3. O diretorio `output/` deve ser limpo e regenerado?
+1. O projeto deve receber testes automatizados com JUnit? (requer Maven/Gradle)
+2. O diretorio `output/` deve ser limpo e regenerado?
+3. `compile.sh` deve ser atualizado para remover `--release 8` obsoleto?
 
 ## Session Log
 
@@ -70,3 +71,49 @@ O diagnostico de 2026-05-07 encontrou documentacao stale com nomes antigos como 
 - Exposto `executeKruskal` em `GraphApplicationService`.
 - Adicionada opcao de menu para AGM.
 - A AGM usa a interpretacao nao direcionada do `DirectedGraph`.
+
+### 2026-05-13 - GUI
+
+- Plano de refatoracao salvo em `docs/gui_refactor_plan.md`.
+- Branch de trabalho para GUI: `teste/GUI`.
+- Criado shell Swing inicial em `src/br/edu/grafo/gui`.
+- Mantido `Main` textual como fallback operacional.
+
+### 2026-05-13 - Expansao De GUI E Grafos Tematicos
+
+- Tema da GUI consolidado em modo unico escuro e monocromatico.
+- Dropdowns ajustados para fundo branco, texto preto e selecao preto/branco.
+- Sidebar passou a listar todos os vertices do grafo atual.
+- Aba `Load/Save` passou a carregar Curitiba, Solar System e Solar Hyperspace.
+- `Main` passou a permitir escolha inicial entre Console e GUI.
+- `SolarSystemGraphFactory` foi separado em:
+  - `createScientificGraph()`
+  - `createHyperspaceGraph()`
+- A explicacao do comportamento do Warshall no sistema solar foi documentada.
+- A unidade de peso na GUI foi alinhada com o grafo carregado.
+- O usuario fara uma revisao posterior de qualidade e depuracao do codigo.
+
+### 2026-05-13 - Quality Improvement Plan Executado
+
+Base teorica: SOLID (Martin), Effective Java (Bloch), UML Distilled (Fowler), agents.md.
+
+**Arquivos criados:**
+- `application/GraphService.java` — interface para servico de aplicacao (DIP, ISP)
+- `util/GraphRepository.java` — interface para persistencia (DIP)
+- `application/EdgeDisplayItem.java` — DTO imutavel compartilhado console+GUI (DRY, SRP)
+- `application/GraphType.java` — enum com metadados por tipo de grafo (OCP)
+
+**Modificacoes:**
+- `Edge`: campos `final`, setters removidos — imutabilidade (LSP, P8, P14)
+- `DirectedGraph`: removido `printAdjacencies()` e `System.out.println`; vertices invalidos lancam `IllegalArgumentException`; `getInformation()` retorna `Optional<String>`; `getAdjacentVertices(int)` retorna `List<Integer>`; usa `List<List<Edge>>`; metodos legados em portugues removidos (SRP, P1, P15, P16, P18, P23, P24)
+- `GraphStorage`: implementa `GraphRepository`; `load()` retorna `Optional<DirectedGraph>`; sem `println`; metodos legados removidos (DIP, P11, P18)
+- `GraphApplicationService`: implementa `GraphService`; injeta `GraphRepository`; campo `grafo` -> `graph`; `saveGraph`/`loadGraph` retornam `boolean` (DIP, P11, P17)
+- `GraphAlgorithms`: removidos `printBooleanMatrix` e `printReachabilityStatistics` (SRP, P7)
+- `GraphConsoleUI`: usa `EdgeDisplayItem` compartilhado; inner class duplicada removida; metodos estaticos de display de matriz adicionados (DRY, P19)
+- `GraphGuiController`: depende de `GraphService`; usa `GraphType` enum; usa `EdgeDisplayItem` compartilhado (OCP, DIP, P5, P13, P19)
+- `Main`: depende de `GraphService`; sem dependencia direta de `GraphStorage` (DIP)
+- `ExampleGraph`, `CuritibaWalkGraphExample`, `SolarSystemGraphExample`: atualizados para nova API
+- `GraphEditPanel`, `ShortestPathPanel`: atualizados para `EdgeDisplayItem` compartilhado e `Optional`
+- `docs/design.md`, `docs/plan.md`, `docs/tasks.md`: atualizados com diagramas UML Mermaid e status
+
+**Resultado:** compilacao verificada via PowerShell + javac — zero erros.

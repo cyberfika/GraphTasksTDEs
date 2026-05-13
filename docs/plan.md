@@ -1,82 +1,98 @@
 # Plan
 
-> Status: Completed
+> Status: Active
 > Authority: Tier 3 - Working Document
-> Last Updated: 2026-05-07
+> Last Updated: 2026-05-13
 > Owner: Jafte Carneiro Fagundes da Silva
 
-## Objetivo
+## Objective
 
-Registrar o plano concluido do TDE 2: Warshall, matriz de alcancabilidade e persistencia de grafos em `.bin`.
+Executar o plano de melhoria de qualidade (quality_improvement_plan.md) para corrigir
+violacoes de OOP/SOLID identificadas na codebase, alinhando o codigo com os principios
+do agents.md.
 
-## Escopo
+## Scope
 
 Incluido:
 
-- Implementacao de Warshall em `GraphAlgorithms`.
-- Exibicao de matriz booleana e estatisticas de alcancabilidade.
-- Integracao com menu via `GraphApplicationService`.
-- Exemplo manual em `ExampleGraph`.
-- Persistencia local via `GraphStorage`.
+- Tornar `Edge` imutavel (remover setters, finalizar campos).
+- Refatorar `DirectedGraph`: remover I/O, lancamento de excecoes, `Optional`, nova API.
+- Extrair interfaces `GraphService` e `GraphRepository` (DIP).
+- Criar `EdgeDisplayItem` compartilhado entre console e GUI (DRY).
+- Criar `GraphType` enum (OCP).
+- Refatorar `GraphStorage` para implementar `GraphRepository`.
+- Refatorar `GraphApplicationService` para implementar `GraphService`.
+- Remover metodos de display de `GraphAlgorithms` (SRP).
+- Remover metodos legados em portugues.
+- Atualizar todos os callers para usar nova API.
+- Atualizar documentacao (design.md, tasks.md, plan.md, memory.md).
 
-Fora do escopo:
+Fora do escopo (requer aprovacao separada):
 
-- Testes automatizados.
-- Maven, Gradle ou JUnit.
-- Refatoracao de comportamento de validacao.
-- Limpeza de `output/`.
+- Testes automatizados (JUnit 5, Mockito) — requer decisao sobre build tool.
+- Maven/Gradle — mudanca estrutural significativa.
+- Algoritmos adicionais (Floyd-Warshall para distancias, etc.).
 
 ## Assumptions
 
-1. O projeto deve permanecer compativel com Java 8+.
-2. Vertices sao indexados de `0` a `numVertices - 1`.
-3. Alcancabilidade considera existencia de caminho, independentemente de peso.
-4. Autoalcancabilidade e considerada verdadeira em Warshall.
-5. Documentacao pode ficar em portugues; identificadores de codigo permanecem em ingles.
+1. Java 8+ compatibilidade mantida (Optional, lambdas, default methods sao Java 8).
+2. Serializacao `.bin` existente permanece compativel (serialVersionUID mantido).
+3. Documentacao pode ser em portugues; identificadores de codigo permanecem em ingles.
+4. Metodos legados em portugues sao removidos (nenhum chamador externo conhecido).
 
-## Arquitetura Impactada
+## Architecture Impact
 
-- `GraphAlgorithms`: Warshall e helpers de impressao.
-- `GraphApplicationService`: orquestracao dos algoritmos e operacoes do grafo.
-- `GraphStorage`: persistencia por serializacao Java.
-- `ExampleGraph`: exemplo manual de validacao.
+- Nova interface `GraphService`: `Main` e `GraphGuiController` passam a depender dela.
+- Nova interface `GraphRepository`: `GraphApplicationService` passa a depender dela.
+- `Edge` imutavel: impacta todos os callers (nenhum usava setters — sem quebra).
+- `getInformation()` retorna `Optional<String>`: todos os callers atualizados.
+- `createEdge`/`removeEdge` retornam `boolean`: callers atualizados para usar retorno.
+- `GraphStorage` virou classe instanciavel: apenas `GraphApplicationService` a instancia.
 
-## Estrategia De Implementacao
+## Implementation Strategy
 
-Implementacao atual:
+Implementado em 2026-05-13:
 
-1. `GraphAlgorithms.warshall(DirectedGraph graph)` cria uma matriz `boolean[][]`.
-2. A matriz inicial recebe as arestas diretas existentes.
-3. A diagonal e marcada como `true`.
-4. Os tres loops de Warshall calculam o fechamento transitivo.
-5. `ExampleGraph` exibe matriz inicial, matriz final e verificacoes especificas.
+1. Criadas interfaces `GraphService` e `GraphRepository`.
+2. Criados value objects `EdgeDisplayItem` e enum `GraphType`.
+3. `Edge` tornada imutavel (final fields, no setters).
+4. `DirectedGraph` refatorado: sem I/O, exceptions, Optional, List<List<Edge>>.
+5. `GraphStorage` refatorado: implementa GraphRepository, retorna Optional.
+6. `GraphApplicationService` refatorado: implementa GraphService, injeta GraphRepository.
+7. `GraphAlgorithms` refatorado: apenas algoritmos puros (sem print).
+8. `GraphConsoleUI` refatorado: usa EdgeDisplayItem compartilhado, metodos estaticos de display.
+9. `GraphGuiController` refatorado: usa GraphService, GraphType, EdgeDisplayItem compartilhado.
+10. `Main` refatorado: usa GraphService, EdgeDisplayItem, Optional.
+11. `ExampleGraph`, `CuritibaWalkGraphExample`, `SolarSystemGraphExample` atualizados.
+12. `GraphEditPanel` atualizado para usar EdgeDisplayItem compartilhado.
+13. `ShortestPathPanel` atualizado para Optional.
 
-## Estrategia De Teste
+## Testing Strategy
 
 Validacao atual:
 
-- Execucao manual de `java -cp output br.edu.grafo.app.ExampleGraph`.
-- Compilacao direta com o `javac.exe` configurado no projeto usando `--release 8`.
+- Compilacao verificada: zero erros de compilacao.
+- Verificacao manual de `ExampleGraph` recomendada.
 
 Gap conhecido:
 
-- Nao ha testes automatizados.
-- Nao foi introduzido JUnit nesta tarefa para evitar mudanca de estrutura e dependencia.
-- A compilacao com JDK moderno em modo `--release 8` emite warnings de opcao obsoleta, mas gera bytecode executavel no Java 8.
+- Nenhum teste automatizado. Testes requerem decisao sobre JUnit 5 e build tool.
 
-## Riscos
+## Risks
 
-- `GraphStorage` usa `ObjectInputStream`; arquivos `.bin` devem ser locais e confiaveis.
-- `output/` pode conter classes antigas; limpar esse diretorio exige confirmacao separada.
-- A politica de erro e mista entre `DirectedGraph`, `GraphApplicationService` e `GraphStorage`.
+- Arquivos `.bin` gerados com versoes anteriores podem ser incompativeis se `Edge` tiver
+  mudado de forma incompativel. `serialVersionUID = 1L` mantido em ambos `Edge` e
+  `DirectedGraph`, mas a remocao de campos (setters nao afetam serializacao) nao
+  quebra leitura. Monitorar ao carregar arquivos `.bin` antigos.
 
 ## Acceptance Criteria
 
-- [x] Warshall implementado em `GraphAlgorithms`.
-- [x] Menu integrado via `GraphApplicationService`.
-- [x] Exemplo manual em `ExampleGraph`.
-- [x] Save/load local via `GraphStorage`.
-- [x] Documentacao alinhada aos nomes reais do codigo.
+- [x] `Edge` imutavel: sem setters, campos finais.
+- [x] `DirectedGraph`: sem `System.out.println`, sem metodos legados, `Optional` returns.
+- [x] Interfaces `GraphService` e `GraphRepository` criadas e implementadas.
+- [x] `EdgeDisplayItem` compartilhado (removida duplicacao).
+- [x] `GraphType` enum (eliminada cadeia de if).
+- [x] `GraphAlgorithms`: sem metodos de display.
+- [x] Compilacao sem erros.
 - [ ] Testes automatizados adicionados.
-- [x] Compilacao verificada no ambiente atual com `javac.exe --release 8`.
-- [x] Execucao manual verificada com Java 8.
+- [ ] Maven/Gradle configurado.

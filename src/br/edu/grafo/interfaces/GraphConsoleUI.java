@@ -1,41 +1,53 @@
 package br.edu.grafo.interfaces;
 
-import br.edu.grafo.model.*;
-import br.edu.grafo.util.*;
-import br.edu.grafo.algorithm.*;
-import br.edu.grafo.application.*;
-import java.util.*;
+import br.edu.grafo.algorithm.KruskalResult;
+import br.edu.grafo.application.EdgeDisplayItem;
+import br.edu.grafo.application.ShortestPathResult;
+import br.edu.grafo.model.DirectedGraph;
+import br.edu.grafo.model.Edge;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Scanner;
 
 /**
- * Console user interface for graph manipulation.
+ * Interface de console para o sistema de grafos.
  *
- * Handles all user input/output.
- * Separates presentation concerns from application logic.
+ * <p>Concentra toda entrada e saida de console, separando as preocupacoes
+ * de apresentacao da logica de aplicacao (SRP).
+ * Os metodos estaticos de display de matrizes podem ser usados por
+ * qualquer entrypoint (demos, testes manuais) sem instanciacao.</p>
  *
  * @author Jafte Carneiro Fagundes da Silva
- * @version 2.0
+ * @version 3.0
  */
 public class GraphConsoleUI {
+
     private final Scanner scanner;
 
     public GraphConsoleUI() {
         this.scanner = new Scanner(System.in);
     }
 
+    // --- Boas-vindas e saida ---
+
     public void displayWelcome() {
         System.out.println("=== DIRECTED GRAPH SYSTEM ===\n");
+    }
+
+    public String askExecutionMode() {
+        System.out.println("Choose execution mode:");
+        System.out.println("1. Console");
+        System.out.println("2. GUI");
+        System.out.print("\nChoose an option: ");
+        return scanner.nextLine().trim();
     }
 
     public void displayGoodbye() {
         System.out.println("\n=== Thank you for using the system! ===");
     }
 
-    public boolean askLoadSavedGraph() {
-        System.out.println("File 'grafo.bin' found!");
-        System.out.print("Load previous graph? (Y/N): ");
-        String response = scanner.nextLine().trim().toUpperCase();
-        return response.equals("Y") || response.equals("YES");
-    }
+    // --- Criacao de grafo ---
 
     public int askNumVertices() {
         System.out.print("How many vertices? (1-100): ");
@@ -45,7 +57,7 @@ public class GraphConsoleUI {
                 System.out.println("Error: vertices must be between 1 and 100!");
                 return -1;
             }
-            System.out.println("✓ Graph created with " + num + " vertices\n");
+            System.out.println("Graph created with " + num + " vertices\n");
             return num;
         } catch (NumberFormatException e) {
             System.out.println("Error: invalid input!");
@@ -53,42 +65,56 @@ public class GraphConsoleUI {
         }
     }
 
+    // --- Menu principal ---
+
     public String displayMenuAndGetChoice() {
         System.out.println("\n=== MAIN MENU ===");
         System.out.println("1. Add edge");
         System.out.println("2. Create new graph");
         System.out.println("3. Load Curitiba walk graph");
-        System.out.println("4. Load graph from .bin");
-        System.out.println("5. Remove edge");
-        System.out.println("6. Save graph to .bin");
-        System.out.println("7. Show adjacency list");
-        System.out.println("8. Show adjacency matrix");
-        System.out.println("9. Show graph info");
-        System.out.println("10. Show vertex names");
-        System.out.println("11. Breadth-First Search (BFS)");
-        System.out.println("12. Depth-First Search (DFS)");
-        System.out.println("13. Dijkstra - Shortest Path");
-        System.out.println("14. Kruskal - Minimum Spanning Tree");
-        System.out.println("15. Warshall - Reachability Matrix");
+        System.out.println("4. Load Solar System graph");
+        System.out.println("5. Load Solar Hyperspace graph");
+        System.out.println("6. Load graph from .bin");
+        System.out.println("7. Remove edge");
+        System.out.println("8. Save graph to .bin");
+        System.out.println("9. Show adjacency list");
+        System.out.println("10. Show adjacency matrix");
+        System.out.println("11. Show graph info");
+        System.out.println("12. Show vertex names");
+        System.out.println("13. Breadth-First Search (BFS)");
+        System.out.println("14. Depth-First Search (DFS)");
+        System.out.println("15. Dijkstra - Shortest Path");
+        System.out.println("16. Kruskal - Minimum Spanning Tree");
+        System.out.println("17. Warshall - Reachability Matrix");
         System.out.println("0. Exit");
         System.out.print("\nChoose an option: ");
-
         return scanner.nextLine().trim();
     }
 
-    public void displayLoadingError() {
-        System.out.println("Failed to load. Creating new graph.\n");
+    // --- Mensagens gerais ---
+
+    public void displayInvalidOption() {
+        System.out.println("Invalid option!");
     }
 
     public void displayOperationCanceled() {
         System.out.println("Operation canceled.");
     }
 
-    public void displayInvalidOption() {
-        System.out.println("Invalid option!");
+    public void displayInvalidInput() {
+        System.out.println("Invalid input.");
     }
 
-    // Edge operations
+    public void displayGraphRequired() {
+        System.out.println("No graph is currently loaded. Create or load a graph first.");
+    }
+
+    public void displayLoadingError() {
+        System.out.println("Failed to load. Creating new graph.\n");
+    }
+
+    // --- Arestas ---
+
     public EdgeInput askEdgeInput(int maxVertex) {
         System.out.println("\n=== ADD EDGE ===");
         try {
@@ -112,7 +138,11 @@ public class GraphConsoleUI {
     }
 
     public void displayEdgeAdded() {
-        System.out.println("✓ Edge added successfully!");
+        System.out.println("Edge added successfully!");
+    }
+
+    public void displayEdgeDuplicate() {
+        System.out.println("Warning: edge already exists, skipped.");
     }
 
     public boolean askContinueAddingEdges() {
@@ -137,9 +167,8 @@ public class GraphConsoleUI {
             String originName = formatVertexLabel(graph, item.origin);
             String destinationName = formatVertexLabel(graph, item.destination);
             String labelSuffix = item.label.isEmpty() ? "" : " [" + item.label + "]";
-            String connector = item.bidirectional ? " -- " : " -> ";
             System.out.printf("%d. %s%s%s | weight=%.2f%s%n",
-                    i + 1, originName, connector, destinationName, item.weight, labelSuffix);
+                    i + 1, originName, item.connector(), destinationName, item.weight, labelSuffix);
         }
     }
 
@@ -152,29 +181,27 @@ public class GraphConsoleUI {
         }
     }
 
-    public void displayAdjacencyMatrix(DirectedGraph grafo) {
+    // --- Visualizacao do grafo ---
+
+    public void displayAdjacencyMatrix(DirectedGraph graph) {
         System.out.println("\n=== ADJACENCY MATRIX ===\n");
 
         System.out.print("V\\V ");
-        for (int j = 0; j < grafo.getNumVertices(); j++) {
+        for (int j = 0; j < graph.getNumVertices(); j++) {
             System.out.printf("%8d ", j);
         }
         System.out.println();
-        for (int k = 0; k < 12 + grafo.getNumVertices() * 9; k++) {
+        for (int k = 0; k < 12 + graph.getNumVertices() * 9; k++) {
             System.out.print("-");
         }
         System.out.println();
 
-        for (int i = 0; i < grafo.getNumVertices(); i++) {
+        for (int i = 0; i < graph.getNumVertices(); i++) {
             System.out.printf(" %d  ", i);
-            for (int j = 0; j < grafo.getNumVertices(); j++) {
-                if (grafo.hasEdge(i, j)) {
-                    Optional<Edge> edge = grafo.getEdge(i, j);
-                    if (edge.isPresent()) {
-                        System.out.printf("%8.2f ", edge.get().getWeight());
-                    } else {
-                        System.out.print("       ∞ ");
-                    }
+            for (int j = 0; j < graph.getNumVertices(); j++) {
+                Optional<Edge> edge = graph.getEdge(i, j);
+                if (edge.isPresent()) {
+                    System.out.printf("%8.2f ", edge.get().getWeight());
                 } else {
                     System.out.print("       ∞ ");
                 }
@@ -184,33 +211,67 @@ public class GraphConsoleUI {
         System.out.println();
     }
 
-    public void displayAdjacencyList(DirectedGraph grafo) {
+    public void displayAdjacencyList(DirectedGraph graph) {
         System.out.println("\n=== ADJACENCY LIST ===\n");
 
-        for (int i = 0; i < grafo.getNumVertices(); i++) {
-            System.out.print("V" + i);
-            String info = grafo.getInformation(i);
-            if (info != null && !info.isEmpty() && !info.equals("V" + i)) {
-                System.out.print(" (" + info + ")");
-            }
+        for (int i = 0; i < graph.getNumVertices(); i++) {
+            final int vertex = i;
+            System.out.print("V" + vertex);
+            graph.getInformation(vertex).ifPresent(info -> {
+                if (!info.equals("V" + vertex)) {
+                    System.out.print(" (" + info + ")");
+                }
+            });
             System.out.print(" -> ");
 
-            List<Edge> edges = grafo.getAdjacencies(i);
-            if (edges.isEmpty()) {
-                System.out.println("[]");
-            } else {
-                System.out.println(edges);
-            }
+            List<Edge> edges = graph.getAdjacencies(i);
+            System.out.println(edges.isEmpty() ? "[]" : edges);
         }
         System.out.println();
     }
+
+    public void displayGraphInfo(DirectedGraph graph) {
+        System.out.println("\n=== GRAPH INFORMATION ===\n");
+
+        int numVertices = graph.getNumVertices();
+        int numEdges = 0;
+        for (int i = 0; i < numVertices; i++) {
+            numEdges += graph.getAdjacencies(i).size();
+        }
+
+        System.out.println("Vertices: " + numVertices);
+        System.out.println("Edges: " + numEdges);
+        System.out.println("Unique connections (ignoring direction): " + countUniqueConnections(graph));
+        if (numVertices <= 1) {
+            System.out.println("Density: N/A (requires at least 2 vertices)");
+        } else {
+            System.out.printf("Density: %.2f%%%n", (100.0 * numEdges) / (numVertices * (numVertices - 1)));
+        }
+
+        System.out.println("\nOut-degrees:");
+        for (int i = 0; i < numVertices; i++) {
+            System.out.println("  V" + i + ": " + graph.getAdjacencies(i).size());
+        }
+
+        System.out.println("\nIn-degrees:");
+        for (int i = 0; i < numVertices; i++) {
+            int inDegree = 0;
+            for (int j = 0; j < numVertices; j++) {
+                if (graph.hasEdge(j, i)) inDegree++;
+            }
+            System.out.println("  V" + i + ": " + inDegree);
+        }
+        System.out.println();
+    }
+
+    // --- Algoritmos de busca ---
 
     public int askBFSSourceVertex(int maxVertex) {
         return askAlgorithmSourceVertex("BREADTH-FIRST SEARCH (BFS)", maxVertex);
     }
 
     public void displayBFSResult(List<Integer> visited) {
-        System.out.println("\n✓ Visit order (BFS): " + visited);
+        System.out.println("\nVisit order (BFS): " + visited);
         System.out.println("  Vertices visited: " + visited.size() + "\n");
     }
 
@@ -219,7 +280,7 @@ public class GraphConsoleUI {
     }
 
     public void displayDFSResult(List<Integer> visited) {
-        System.out.println("\n✓ Visit order (DFS): " + visited);
+        System.out.println("\nVisit order (DFS): " + visited);
         System.out.println("  Vertices visited: " + visited.size() + "\n");
     }
 
@@ -227,24 +288,8 @@ public class GraphConsoleUI {
         return askAlgorithmSourceVertex("DIJKSTRA - SHORTEST PATH", maxVertex);
     }
 
-    public String askVertexName(String prompt) {
-        System.out.print(prompt);
-        return scanner.nextLine().trim();
-    }
-
-    private int askAlgorithmSourceVertex(String algorithm, int maxVertex) {
-        System.out.println("\n=== " + algorithm + " ===");
-        System.out.print("Source vertex (0-" + (maxVertex - 1) + "): ");
-        try {
-            return Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("Error: invalid input!");
-            return -1;
-        }
-    }
-
     public void displayDijkstraResult(double[] distances, int source) {
-        System.out.println("\n✓ Minimum distances from V" + source + ":\n");
+        System.out.println("\nMinimum distances from V" + source + ":\n");
         for (int i = 0; i < distances.length; i++) {
             if (distances[i] == Double.POSITIVE_INFINITY) {
                 System.out.println("  V" + i + ": ∞ (unreachable)");
@@ -255,37 +300,33 @@ public class GraphConsoleUI {
         System.out.println();
     }
 
-    public void displayShortestPathResult(DirectedGraph graph, ShortestPathResult result) {
-        System.out.println("\n=== SHORTEST PATH ===\n");
-        String sourceLabel = formatVertexLabel(graph, result.getSource());
-        String destinationLabel = formatVertexLabel(graph, result.getDestination());
-
-        if (!result.isReachable()) {
-            System.out.println("No path found between " + sourceLabel + " and " + destinationLabel + ".");
-            System.out.println();
-            return;
-        }
-
-        System.out.println("Source: " + sourceLabel);
-        System.out.println("Destination: " + destinationLabel);
-        System.out.printf("Total distance: %.2f km%n", result.getTotalDistance());
-
-        StringBuilder pathBuilder = new StringBuilder();
-        for (int vertex : result.getPath()) {
-            if (pathBuilder.length() > 0) {
-                pathBuilder.append(" -> ");
-            }
-            pathBuilder.append(formatVertexLabel(graph, vertex));
-        }
-
-        System.out.println("Path: " + pathBuilder);
-        System.out.println();
+    public String askVertexName(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine().trim();
     }
 
-    public void displayWarshallMatrix(boolean[][] reachability) {
-        System.out.println("\n=== WARSHALL - REACHABILITY MATRIX ===\n");
+    // --- Warshall ---
 
-        int n = reachability.length;
+    public void displayWarshallMatrix(boolean[][] reachability) {
+        printBooleanMatrix(reachability, "WARSHALL - REACHABILITY MATRIX");
+    }
+
+    public void displayWarshallStatistics(boolean[][] reachability) {
+        printReachabilityStatistics(reachability, "REACHABILITY STATISTICS");
+    }
+
+    /**
+     * Imprime uma matriz booleana formatada.
+     * Metodo estatico para uso sem instancia (demos, exemplos).
+     *
+     * @param matrix matriz booleana N x N
+     * @param title  titulo da secao
+     */
+    public static void printBooleanMatrix(boolean[][] matrix, String title) {
+        int n = matrix.length;
+
+        System.out.println("\n=== " + title + " ===\n");
+
         System.out.print("V\\V ");
         for (int j = 0; j < n; j++) {
             System.out.printf("%5d", j);
@@ -301,18 +342,25 @@ public class GraphConsoleUI {
         for (int i = 0; i < n; i++) {
             System.out.printf(" %d  ", i);
             for (int j = 0; j < n; j++) {
-                char c = reachability[i][j] ? 'T' : 'F';
-                System.out.printf("%5c", c);
+                System.out.printf("%5c", matrix[i][j] ? 'T' : 'F');
             }
             System.out.println();
         }
         System.out.println();
     }
 
-    public void displayWarshallStatistics(boolean[][] reachability) {
-        System.out.println("=== REACHABILITY STATISTICS ===\n");
-
+    /**
+     * Imprime estatísticas de alcancabilidade por vertice.
+     * Metodo estatico para uso sem instancia (demos, exemplos).
+     *
+     * @param reachability matriz de alcancabilidade
+     * @param title        titulo da secao
+     */
+    public static void printReachabilityStatistics(boolean[][] reachability, String title) {
         int n = reachability.length;
+
+        System.out.println("\n=== " + title + " ===\n");
+
         for (int i = 0; i < n; i++) {
             int count = 0;
             StringBuilder reachable = new StringBuilder();
@@ -329,6 +377,8 @@ public class GraphConsoleUI {
         }
         System.out.println();
     }
+
+    // --- Kruskal ---
 
     public void displayKruskalResult(KruskalResult result) {
         System.out.println("\n=== KRUSKAL - MINIMUM SPANNING TREE ===\n");
@@ -347,46 +397,38 @@ public class GraphConsoleUI {
         }
 
         System.out.printf("%nTotal weight: %.2f%n", result.getTotalWeight());
-        if (result.isSpanningTree()) {
-            System.out.println("Status: minimum spanning tree found.");
-        } else {
-            System.out.println("Status: graph is disconnected in the undirected interpretation; partial forest returned.");
-        }
+        System.out.println(result.isSpanningTree()
+                ? "Status: minimum spanning tree found."
+                : "Status: graph is disconnected; partial forest returned.");
         System.out.println();
     }
 
-    public void displayGraphInfo(DirectedGraph grafo) {
-        System.out.println("\n=== GRAPH INFORMATION ===\n");
+    // --- Shortest path ---
 
-        int numVertices = grafo.getNumVertices();
-        int numEdges = 0;
+    public void displayShortestPathResult(DirectedGraph graph, ShortestPathResult result) {
+        System.out.println("\n=== SHORTEST PATH ===\n");
+        String sourceLabel = formatVertexLabel(graph, result.getSource());
+        String destinationLabel = formatVertexLabel(graph, result.getDestination());
 
-        for (int i = 0; i < numVertices; i++) {
-            numEdges += grafo.getAdjacencies(i).size();
+        if (!result.isReachable()) {
+            System.out.println("No path found between " + sourceLabel + " and " + destinationLabel + ".\n");
+            return;
         }
 
-        System.out.println("Vertices: " + numVertices);
-        System.out.println("Edges: " + numEdges);
-        System.out.println("Unique connections (ignoring direction): " + countUniqueConnections(grafo));
-        System.out.printf("Density: %.2f%%%n", (100.0 * numEdges) / (numVertices * (numVertices - 1)));
+        System.out.println("Source: " + sourceLabel);
+        System.out.println("Destination: " + destinationLabel);
+        System.out.printf("Total distance: %.2f%n", result.getTotalDistance());
 
-        System.out.println("\nOut-degrees:");
-        for (int i = 0; i < numVertices; i++) {
-            System.out.println("  V" + i + ": " + grafo.getAdjacencies(i).size());
+        StringBuilder pathBuilder = new StringBuilder();
+        for (int vertex : result.getPath()) {
+            if (pathBuilder.length() > 0) pathBuilder.append(" -> ");
+            pathBuilder.append(formatVertexLabel(graph, vertex));
         }
-
-        System.out.println("\nIn-degrees:");
-        for (int i = 0; i < numVertices; i++) {
-            int inDegree = 0;
-            for (int j = 0; j < numVertices; j++) {
-                if (grafo.hasEdge(j, i)) {
-                    inDegree++;
-                }
-            }
-            System.out.println("  V" + i + ": " + inDegree);
-        }
+        System.out.println("Path: " + pathBuilder);
         System.out.println();
     }
+
+    // --- Persistencia ---
 
     public String askSaveFilename() {
         System.out.println("\n=== SAVE GRAPH ===");
@@ -395,23 +437,24 @@ public class GraphConsoleUI {
         return filename.isEmpty() ? "grafo" : filename;
     }
 
-    public void displayGraphSaveMessage(String filename) {
-        System.out.println("✓ Graph saved as: " + filename + ".bin\n");
+    public void displayGraphSaveSuccess(String filename) {
+        System.out.println("Graph saved as: " + filename + ".bin\n");
+    }
+
+    public void displayGraphSaveError(String filename) {
+        System.out.println("Error saving graph to: " + filename + ".bin\n");
     }
 
     public void displayLoadOptions(String[] savedGraphs) {
         System.out.println("\n=== LOAD GRAPH ===");
-
         if (savedGraphs.length == 0) {
             System.out.println("No saved graphs found.");
             return;
         }
-
         System.out.println("Available graphs:");
         for (int i = 0; i < savedGraphs.length; i++) {
             System.out.println("  " + (i + 1) + ". " + savedGraphs[i]);
         }
-
         System.out.print("\nChoose number or name: ");
     }
 
@@ -431,9 +474,15 @@ public class GraphConsoleUI {
         System.out.println("Curitiba walk graph loaded successfully!");
     }
 
-    public void displayInvalidInput() {
-        System.out.println("Invalid input.");
+    public void displaySolarSystemGraphLoadedSuccessfully() {
+        System.out.println("Solar system graph loaded successfully!");
     }
+
+    public void displaySolarSystemHyperspaceGraphLoadedSuccessfully() {
+        System.out.println("Solar system hyperspace graph loaded successfully!");
+    }
+
+    // --- Nomes de vertices ---
 
     public void displayVertexNames(List<String> names) {
         System.out.println("\n=== VERTEX NAMES ===\n");
@@ -455,55 +504,47 @@ public class GraphConsoleUI {
         }
     }
 
-    public void displayGraphRequired() {
-        System.out.println("No graph is currently loaded. Create or load a graph first.");
-    }
+    // --- Utilitarios ---
 
     public void close() {
         scanner.close();
     }
 
     private String formatVertexLabel(DirectedGraph graph, int vertex) {
-        String information = graph.getInformation(vertex);
-        if (information != null && !information.isEmpty()) {
-            return "V" + vertex + " (" + information + ")";
-        }
-        return "V" + vertex;
+        return graph.getInformation(vertex)
+                .map(info -> "V" + vertex + " (" + info + ")")
+                .orElse("V" + vertex);
     }
 
     private int countUniqueConnections(DirectedGraph graph) {
-        Set<String> connections = new HashSet<>();
+        java.util.Set<String> connections = new java.util.HashSet<>();
         for (int origin = 0; origin < graph.getNumVertices(); origin++) {
             for (Edge edge : graph.getAdjacencies(origin)) {
-                int destination = edge.getDestination();
-                int vertexA = Math.min(origin, destination);
-                int vertexB = Math.max(origin, destination);
-                connections.add(vertexA + ":" + vertexB);
+                int a = Math.min(origin, edge.getDestination());
+                int b = Math.max(origin, edge.getDestination());
+                connections.add(a + ":" + b);
             }
         }
         return connections.size();
     }
 
-    /**
-     * Value object for edge input.
-     */
-    public static class EdgeDisplayItem {
-        public final int origin;
-        public final int destination;
-        public final double weight;
-        public final String label;
-        public final boolean bidirectional;
-
-        public EdgeDisplayItem(int origin, int destination, double weight, String label, boolean bidirectional) {
-            this.origin = origin;
-            this.destination = destination;
-            this.weight = weight;
-            this.label = label;
-            this.bidirectional = bidirectional;
+    private int askAlgorithmSourceVertex(String algorithm, int maxVertex) {
+        System.out.println("\n=== " + algorithm + " ===");
+        System.out.print("Source vertex (0-" + (maxVertex - 1) + "): ");
+        try {
+            return Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: invalid input!");
+            return -1;
         }
     }
 
-    public static class EdgeInput {
+    // --- Inner classes ---
+
+    /**
+     * Objeto de entrada para criacao de aresta via console.
+     */
+    public static final class EdgeInput {
         public final int origin;
         public final int destination;
         public final double weight;
@@ -513,7 +554,7 @@ public class GraphConsoleUI {
             this.origin = origin;
             this.destination = destination;
             this.weight = weight;
-            this.label = label;
+            this.label = (label != null) ? label : "";
         }
     }
 }

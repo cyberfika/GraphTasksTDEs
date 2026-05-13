@@ -477,16 +477,22 @@ Mapeamento:
 | Opcao | Acao |
 | --- | --- |
 | `1` | Adicionar aresta |
-| `2` | Remover aresta |
-| `3` | Mostrar matriz de adjacencia |
-| `4` | Mostrar lista de adjacencia |
-| `5` | BFS |
-| `6` | DFS |
-| `7` | Dijkstra |
-| `8` | Warshall |
-| `9` | Informacoes do grafo |
-| `10` | Salvar grafo |
-| `11` | Carregar grafo |
+| `2` | Criar novo grafo |
+| `3` | Carregar grafo Curitiba Walk |
+| `4` | Carregar grafo Sistema Solar |
+| `5` | Carregar grafo Solar Hyperspace |
+| `6` | Carregar grafo de arquivo .bin |
+| `7` | Remover aresta |
+| `8` | Salvar grafo em .bin |
+| `9` | Mostrar lista de adjacencia |
+| `10` | Mostrar matriz de adjacencia |
+| `11` | Informacoes do grafo |
+| `12` | Mostrar nomes dos vertices |
+| `13` | BFS - Busca em Largura |
+| `14` | DFS - Busca em Profundidade |
+| `15` | Dijkstra - Menor Caminho |
+| `16` | Kruskal - Arvore Geradora Minima |
+| `17` | Warshall - Matriz de Alcancabilidade |
 | `0` | Sair |
 
 Ponto de defesa:
