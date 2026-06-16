@@ -4,6 +4,7 @@ import br.edu.grafo.gui.component.GraphSidebar;
 import br.edu.grafo.gui.component.GraphStatusBar;
 import br.edu.grafo.gui.design.DesignSystem;
 import br.edu.grafo.gui.panel.AlgorithmsPanel;
+import br.edu.grafo.gui.panel.CliqueTestPanel;
 import br.edu.grafo.gui.panel.GraphEditPanel;
 import br.edu.grafo.gui.panel.LoadSavePanel;
 import br.edu.grafo.gui.panel.OverviewPanel;
@@ -30,6 +31,7 @@ public class GraphMainWindow extends JFrame {
     private final GraphEditPanel graphEditPanel;
     private final ShortestPathPanel shortestPathPanel;
     private final AlgorithmsPanel algorithmsPanel;
+    private final CliqueTestPanel cliqueTestPanel;
 
     public GraphMainWindow(GraphGuiController controller) {
         super("Graph Tasks GUI");
@@ -44,6 +46,7 @@ public class GraphMainWindow extends JFrame {
         this.graphEditPanel = new GraphEditPanel(controller, this::refreshAll);
         this.shortestPathPanel = new ShortestPathPanel(controller);
         this.algorithmsPanel = new AlgorithmsPanel(controller);
+        this.cliqueTestPanel = new CliqueTestPanel(controller);
 
         buildFrame();
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -80,6 +83,7 @@ public class GraphMainWindow extends JFrame {
         tabs.add(tabButton("edit", "03 EDIT"));
         tabs.add(tabButton("path", "04 PATHS"));
         tabs.add(tabButton("algorithms", "05 ALGORITHMS"));
+        tabs.add(tabButton("clique", "06 CLIQUE TEST"));
 
         bar.add(brand, BorderLayout.WEST);
         bar.add(tabs, BorderLayout.CENTER);
@@ -107,6 +111,7 @@ public class GraphMainWindow extends JFrame {
         mainCards.add(graphEditPanel, "edit");
         mainCards.add(shortestPathPanel, "path");
         mainCards.add(algorithmsPanel, "algorithms");
+        mainCards.add(cliqueTestPanel, "clique");
         cardLayout.show(mainCards, "overview");
         return mainCards;
     }
@@ -115,6 +120,7 @@ public class GraphMainWindow extends JFrame {
         sidebar.refresh();
         graphEditPanel.refreshEdges();
         overviewPanel.showInfo();
+        cliqueTestPanel.refreshVertexList();
         statusBar.setGraphStatus(controller.hasGraph() ? controller.currentGraphName() : "No graph");
     }
 }

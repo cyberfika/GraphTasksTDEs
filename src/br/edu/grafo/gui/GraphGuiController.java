@@ -206,6 +206,18 @@ public class GraphGuiController {
         return service.executeKruskal();
     }
 
+    public int findComponents() {
+        return graph().findComponents();
+    }
+
+    public boolean isClique(List<Integer> vertices) {
+        return graph().isClique(vertices);
+    }
+
+    public boolean isMaximal(List<Integer> vertices) {
+        return graph().isMaximal(vertices);
+    }
+
     // --- Persistencia ---
 
     public String[] savedGraphNames() {

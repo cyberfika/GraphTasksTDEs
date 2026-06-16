@@ -8,6 +8,7 @@ import br.edu.grafo.gui.design.DesignSystem;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AlgorithmsPanel extends JPanel {
@@ -29,6 +30,9 @@ public class AlgorithmsPanel extends JPanel {
         JButton dijkstraButton = SwingHelper.actionButton("Dijkstra");
         JButton warshallButton = SwingHelper.actionButton("Warshall");
         JButton kruskalButton = SwingHelper.actionButton("Kruskal");
+        JButton componentesButton = SwingHelper.actionButton("Componentes");
+        JButton cliqueButton = SwingHelper.actionButton("Teste Clique");
+        JButton maximalButton = SwingHelper.actionButton("Teste Maximal");
 
         top.add(SwingHelper.formLabel("Source"));
         top.add(sourceField);
@@ -37,6 +41,9 @@ public class AlgorithmsPanel extends JPanel {
         top.add(dijkstraButton);
         top.add(warshallButton);
         top.add(kruskalButton);
+        top.add(componentesButton);
+        top.add(cliqueButton);
+        top.add(maximalButton);
 
         outputArea = SwingHelper.resultArea();
         add(top, BorderLayout.NORTH);
@@ -47,6 +54,9 @@ public class AlgorithmsPanel extends JPanel {
         dijkstraButton.addActionListener(e -> runDijkstra(sourceField.getText().trim()));
         warshallButton.addActionListener(e -> runWarshall());
         kruskalButton.addActionListener(e -> runKruskal());
+        componentesButton.addActionListener(e -> runComponentes());
+        cliqueButton.addActionListener(e -> runTestClique(sourceField.getText().trim()));
+        maximalButton.addActionListener(e -> runTestMaximal(sourceField.getText().trim()));
     }
 
     private int parseSource(String text) {
@@ -127,5 +137,60 @@ public class AlgorithmsPanel extends JPanel {
         builder.append("Total weight: ").append(String.format("%.2f", result.getTotalWeight())).append('\n');
         builder.append("Spanning tree: ").append(result.isSpanningTree());
         outputArea.setText(builder.toString());
+    }
+
+    private void runComponentes() {
+        if (!controller.hasGraph()) {
+            outputArea.setText("No graph loaded.");
+            return;
+        }
+        StringBuilder builder = new StringBuilder();
+        int numComponents = controller.findComponents();
+        builder.append("Total components: ").append(numComponents).append('\n');
+        outputArea.setText(builder.toString());
+    }
+
+    private void runTestClique(String verticesText) {
+        if (!controller.hasGraph()) {
+            outputArea.setText("No graph loaded.");
+            return;
+        }
+        List<Integer> vertices = parseVertices(verticesText);
+        if (vertices.isEmpty()) {
+            outputArea.setText("Invalid vertices format. Enter comma-separated numbers (e.g., 0,1,2)");
+            return;
+        }
+        boolean isClique = controller.isClique(vertices);
+        outputArea.setText("Vertices " + vertices + " form a clique: " + isClique);
+    }
+
+    private void runTestMaximal(String verticesText) {
+        if (!controller.hasGraph()) {
+            outputArea.setText("No graph loaded.");
+            return;
+        }
+        List<Integer> vertices = parseVertices(verticesText);
+        if (vertices.isEmpty()) {
+            outputArea.setText("Invalid vertices format. Enter comma-separated numbers (e.g., 0,1,2)");
+            return;
+        }
+        boolean isMaximal = controller.isMaximal(vertices);
+        outputArea.setText("Vertices " + vertices + " form a maximal clique: " + isMaximal);
+    }
+
+    private List<Integer> parseVertices(String text) {
+        List<Integer> result = new ArrayList<>();
+        if (text == null || text.trim().isEmpty()) {
+            return result;
+        }
+        String[] parts = text.split(",");
+        for (String part : parts) {
+            try {
+                result.add(Integer.parseInt(part.trim()));
+            } catch (NumberFormatException e) {
+                return new ArrayList<>();
+            }
+        }
+        return result;
     }
 }

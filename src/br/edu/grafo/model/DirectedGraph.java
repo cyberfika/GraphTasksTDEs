@@ -190,4 +190,126 @@ public class DirectedGraph implements Serializable {
         validateVertex(origin);
         validateVertex(destination);
     }
+
+    /**
+     * Finds and prints all weakly connected components of the graph.
+     *
+     * <p>A weakly connected component is a maximal subset of vertices
+     * such that there is a path between any pair of vertices if we consider
+     * edges as undirected.</p>
+     *
+     * @return number of components found
+     */
+    public int findComponents() {
+        boolean[] visited = new boolean[numVertices];
+        int componentCount = 0;
+
+        for (int i = 0; i < numVertices; i++) {
+            if (!visited[i]) {
+                List<Integer> component = new ArrayList<>();
+                dfsWeaklyConnected(i, visited, component);
+                componentCount++;
+                System.out.println("Component " + componentCount + ": " + component);
+            }
+        }
+
+        return componentCount;
+    }
+
+    /**
+     * DFS para encontrar componentes fracamente conectadas.
+     * Trata as arestas como nao-direcionadas.
+     */
+    private void dfsWeaklyConnected(int vertex, boolean[] visited, List<Integer> component) {
+        visited[vertex] = true;
+        component.add(vertex);
+
+        // Arestas saindo do vertice
+        for (Edge edge : adjacencyList.get(vertex)) {
+            if (!visited[edge.getDestination()]) {
+                dfsWeaklyConnected(edge.getDestination(), visited, component);
+            }
+        }
+
+        // Arestas chegando ao vertice (para considerar como nao-direcionado)
+        for (int i = 0; i < numVertices; i++) {
+            if (!visited[i]) {
+                for (Edge edge : adjacencyList.get(i)) {
+                    if (edge.getDestination() == vertex) {
+                        dfsWeaklyConnected(i, visited, component);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if a set of vertices forms a clique.
+     *
+     * <p>A clique is a subset of vertices where there is an edge
+     * from each vertex to all other vertices in the set.</p>
+     *
+     * @param vertices list of vertex indices
+     * @return {@code true} if they form a clique, {@code false} otherwise
+     * @throws IllegalArgumentException if any vertex is invalid
+     */
+    public boolean isClique(List<Integer> vertices) {
+        if (vertices == null || vertices.size() < 2) {
+            return vertices != null && vertices.size() <= 1;
+        }
+
+        // Validates all vertices
+        for (int vertex : vertices) {
+            validateVertex(vertex);
+        }
+
+        // Checks if there is an edge between all pairs
+        for (int i = 0; i < vertices.size(); i++) {
+            for (int j = 0; j < vertices.size(); j++) {
+                if (i != j) {
+                    int origin = vertices.get(i);
+                    int destination = vertices.get(j);
+                    if (!hasEdge(origin, destination)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if a set of vertices forms a maximal clique.
+     *
+     * <p>A maximal clique is a clique that cannot be extended
+     * by adding another vertex while remaining a clique.</p>
+     *
+     * @param vertices list of vertex indices
+     * @return {@code true} if they form a maximal clique, {@code false} otherwise
+     * @throws IllegalArgumentException if any vertex is invalid
+     */
+    public boolean isMaximal(List<Integer> vertices) {
+        if (!isClique(vertices)) {
+            return false;
+        }
+
+        // Checks if any other vertex can be added while maintaining clique property
+        Set<Integer> vertexSet = new HashSet<>(vertices);
+        for (int candidate = 0; candidate < numVertices; candidate++) {
+            if (!vertexSet.contains(candidate)) {
+                // Try adding candidate
+                List<Integer> extended = new ArrayList<>(vertices);
+                extended.add(candidate);
+
+                // If candidate connects to all vertices in the clique, it's not maximal
+                if (isClique(extended)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
 }
